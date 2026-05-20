@@ -38,7 +38,7 @@ new  #[Layout('layouts::admin', ['page_title' => 'Positions'])] class extends Co
             ->when($this->search, fn($q) =>
                 $q->where('position_name', 'like', "%{$this->search}%")
             )
-            ->paginate(6);
+            ->orderBy('is_active', 'desc')->paginate(6);
     }
 
     public function toggleActive($id){
@@ -138,11 +138,11 @@ new  #[Layout('layouts::admin', ['page_title' => 'Positions'])] class extends Co
             </flux:table.rows>
         </flux:table>
     </div>
-    <flux:modal name="add-positions" class="md:w-96">
+    <flux:modal name="add-positions" class="md:w-4xl">
         <livewire:admin.positions.add-form/>
     </flux:modal>
 
-    <flux:modal name="edit-positions" class="md:w-96">
+    <flux:modal name="edit-positions" class="md:w-4xl">
         <livewire:admin.positions.edit-form/>
     </flux:modal>
 </div>

@@ -11,7 +11,7 @@ new class extends Component
 {
     public int $positionId;
     public bool $isEdit = false;
-    public int $criteriaId = 0;
+    public $criteriaId = '';
 
     #[Validate('required|min:3|max:50')]
     public $name = '';
@@ -100,6 +100,7 @@ new class extends Component
         Flux::toast('Gagal, Jumlah bobot lebih besar 100%!');
         return false;
     }
+
     public function delete($id): void{
         $criteria = RecruitmentCriteria::findOrFail($id);
         $criteria->delete();
@@ -110,12 +111,19 @@ new class extends Component
     public function close(){
         $this->dispatch('close-criterias', id: $this->positionId);
     }
+
+    public function openLikertForm($id){
+        $this->dispatch('likert-form-opened', id: $id);
+        Flux::modal('likert-setup')->show();
+    }
+
+
 };
 ?>
 
 <div>
     {{-- Simplicity is an acquired taste. - Katharine Gerould --}}
-    <div class="space-y-6 p-4 overflow-visible">
+    <div class="space-y-6 p-4 overflow-visible bg-slate-400/10 rounded-lg">
         <flux:heading class="flex gap-4 items-center justify-between">
             <div class="flex gap-4 items-center">
                 Recruitment Criterias: <flux:badge color="green">{{ $this->position()->position_name }}</flux:badge>
@@ -147,13 +155,19 @@ new class extends Component
                                 <flux:table.cell class="space-x-4 w-1/4">
                                     <flux:button icon="trash" size="sm" type="button" variant="danger" wire:click="delete({{$criteria->id}})" wire:confirm="Are you sure you want to delete this criteria?"></flux:button>
                                     <flux:button class="cursor-pointer" size="sm" wire:click="edit({{$criteria->id}})" icon="pencil"/>
+                                    @if($criteria->data_type === "kualitatif")
+                                        <flux:button class="cursor-pointer" size="sm" wire:click="openLikertForm({{$criteria->id}})" icon="scale"/>
+                                    @endif
                                 </flux:table.cell>
                             </flux:table.row>
                         @endif
                     @endforeach
-                   @if(!$this->isEdit)
-                    <x-admin.positions.add-criteria/>
-                   @endif
+                    @if(!$this->isEdit)
+                        <x-admin.positions.add-criteria/>
+                    @endif
+                    <flux:modal name="likert-setup" class="md:w-4xl">
+                        <livewire:admin.positions.likert-scale/>
+                    </flux:modal>
                 </flux:table.rows>
         </flux:table>
     </div>
