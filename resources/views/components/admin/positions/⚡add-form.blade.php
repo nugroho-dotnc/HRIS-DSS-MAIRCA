@@ -7,30 +7,29 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
-new class extends Component
-{
+new class extends Component {
     #[Validate('required | min:3')]
     public string $position_name;
 
     #[Validate('required')]
-    public $department_id = 0;
+    public $department_id = "";
 
     public $is_active = true;
 
     #[Computed]
-    public function departments(){
+    public function departments()
+    {
         return Department::all();
     }
 
-    public function save(){
+    public function save()
+    {
         $this->validate();
-        Position::create(
-            [
-                'position_name'=> $this->position_name,
-                'department_id'=> $this->department_id,
-                'is_active' => $this->is_active,
-            ]
-        );
+        Position::create([
+            'position_name' => $this->position_name,
+            'department_id' => $this->department_id,
+            'is_active' => $this->is_active,
+        ]);
         Flux::toast('Posisi baru berhasil ditambahkan');
         $this->dispatch('position-created');
     }
@@ -52,23 +51,23 @@ new class extends Component
         <flux:field>
             <flux:label>Department</flux:label>
             <flux:select wire:model="department_id" placeholder="Choose industry..." searchable>
-                    @forelse ($this->departments() as $dept)
+                @forelse ($this->departments() as $dept)
                     <flux:select.option value="{{ $dept->id }}" wire:key='{{ $dept->id }}'>
-                            {{ $dept->department_name }}
+                        {{ $dept->department_name }}
                     </flux:select.option>
-                    @empty
+                @empty
                     <flux:select.option selected disabled>
-                           Tidak ada department
+                        Tidak ada department
                     </flux:select.option>
-                    @endforelse
-                </flux:select>
+                @endforelse
+            </flux:select>
             <flux:error name="department_id" />
         </flux:field>
 
         <flux:field>
-                <flux:label>Is Active?</flux:label>
-                <flux:switch wire:model="is_active" :checked="$this->is_active"/>
-                <flux:error name="is_active" />
+            <flux:label>Is Active?</flux:label>
+            <flux:switch wire:model="is_active" :checked="$this->is_active" />
+            <flux:error name="is_active" />
         </flux:field>
 
         <div class="flex">
