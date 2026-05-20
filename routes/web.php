@@ -15,4 +15,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group( function(){
         Route::livewire('/admin/users', 'pages::admin.users')->name('admin.users');
     });
 
+Route::middleware(['auth', 'verified', 'role:hr'])->group( function(){
+        Route::livewire('/hr/dashboard', 'pages::hr.dashboard')->name('hr.dashboard');
+        Route::livewire('/hr/vacancies', 'pages::hr.vacancies')->name('hr.vacancies');
+    });
+
 require __DIR__.'/settings.php';
