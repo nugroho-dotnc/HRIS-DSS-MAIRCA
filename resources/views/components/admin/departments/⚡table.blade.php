@@ -70,9 +70,9 @@ new class extends Component
 
     <flux:table class="mt-5" :paginate="$this->departments()">
         <flux:table.columns>
-            <flux:table.column>Department Name</flux:table.column>
-            <flux:table.column>Status</flux:table.column>
-            <flux:table.column>Action</flux:table.column>
+            <flux:table.column class="w-1/3">Department Name</flux:table.column>
+            <flux:table.column class="w-1/3">Status</flux:table.column>
+            <flux:table.column class="w-1/3">Action</flux:table.column>
         </flux:table.columns>
 
         <flux:table.rows>

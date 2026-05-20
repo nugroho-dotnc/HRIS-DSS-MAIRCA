@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class RecruitmentCriteria extends Model
 {
     //
-    protected $fillable = ['position_id', 'name', 'weight', 'type'];
+    protected $fillable = ['position_id', 'name', 'weight', 'type', 'data_type'];
 }
