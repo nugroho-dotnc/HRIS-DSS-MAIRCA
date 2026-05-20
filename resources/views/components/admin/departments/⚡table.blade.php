@@ -81,7 +81,11 @@ new class extends Component
                     <flux:table.cell class="flex items-center gap-3">
                         {{ $department->department_name }}
                     </flux:table.cell>
-                    <flux:table.cell>{{$department->is_active?'active':'inactive'}}</flux:table.cell>
+                    <flux:table.cell>
+                        <flux:badge color="{{$department->is_active?'green':'red'}}">
+                            {{$department->is_active?'active':'inactive'}}
+                        </flux:badge>
+                    </flux:table.cell>
                     <flux:table.cell class="space-x-4">
                         <flux:switch :checked="$department->is_active" wire:click="isActiveToggle({{ $department->id }})"/>
                         <flux:button icon="trash" size="sm" type="button" variant="danger" wire:click="delete({{$department->id}})" wire:confirm="Are you sure you want to delete this post?"></flux:button>
@@ -91,10 +95,10 @@ new class extends Component
             @endforeach
         </flux:table.rows>
     </flux:table>
-    <flux:modal name="add-department" class="md:w-96">
+    <flux:modal name="add-department" class="md:w-4xl">
         @livewire('admin.departments.add-form')
     </flux:modal>
-    <flux:modal name="edit-department" class="md:w-96">
+    <flux:modal name="edit-department" class="md:w-4xl">
             @livewire('admin.departments.edit-form')
     </flux:modal>
 </div>
