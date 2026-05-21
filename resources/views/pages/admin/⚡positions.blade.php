@@ -85,14 +85,13 @@ new  #[Layout('layouts::admin', ['page_title' => 'Positions'])] class extends Co
 
 <div>
     <div class="flex flex-1 flex-col gap-4 rounded-xl">
-        <div class="flex justify-between items-center  mt-5">
+        <div class="flex justify-between items-center">
             <flux:input wire:model.live.debounce.300ms="search" class="w-full max-w-md" kbd="⌘K" icon="magnifying-glass" placeholder="Search..."/>
             <flux:modal.trigger name="add-positions">
                 <flux:button class="cursor-pointer">Tambah</flux:button>
             </flux:modal.trigger>
         </div>
-    <flux:spacer />
-        <flux:table class="mt-5" :paginate="$this->positions()">
+        <flux:table :paginate="$this->positions()">
             <flux:table.columns>
                 <flux:table.column>Positions Name</flux:table.column>
                 <flux:table.column>Department</flux:table.column>
@@ -112,7 +111,7 @@ new  #[Layout('layouts::admin', ['page_title' => 'Positions'])] class extends Co
                         <flux:table.cell>{{ $post->recruitment_criteria_count }}</flux:table.cell>
                         <flux:table.cell>{{ $post->recruitment_criteria_sum_weight??0 }}</flux:table.cell>
                         <flux:table.cell>
-                            <flux:badge color="{{$post->is_active?'green':'red'}}">
+                            <flux:badge color="{{$post->is_active?'green':'red'}}" size="sm">
                                 {{$post->is_active?'active':'inactive'}}
                             </flux:badge>
                         </flux:table.cell>
