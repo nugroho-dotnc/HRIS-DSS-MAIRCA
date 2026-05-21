@@ -45,38 +45,64 @@ new #[Layout('layouts::hr', ['page_title' => 'New Vacancies'])] class extends Co
 };
 ?>
 
-<div class="flex flex-1 flex-col gap-4 rounded-xl">
+<div class="flex flex-1 flex-col gap-6 rounded-xl">
     <livewire:bread-crumbs/>
-    <div class="w-full max-w-4xl flex flex-col gap-4 mt-5">
-        <flux:input type="text" label="Title" wire:model="title" placeholder="Tuliskan judul lowongan"/>
-        @if(count($this->positions()) == 0)
-            <flux:callout variant="warning" icon="exclamation-circle" heading="Posisi tidak tersedia!" />
-        @endif
-        <flux:select wire:model="position_id" placeholder="Choose positions..." label="Position">
-            @foreach($this->positions() as $post)
-                <flux:select.option value="{{$post->id}}">{{$post->position_name}}</flux:select.option>
-            @endforeach
-        </flux:select>
-        <flux:textarea
-            wire:model="description"
-            label="Deskripsi Pekerjaan"
-            placeholder="Jelaskan gambaran umum posisi ini, tanggung jawab utama, dan lingkungan kerja. Contoh: Kami mencari seorang Backend Developer yang akan bergabung dengan tim engineering untuk membangun dan mengembangkan sistem internal perusahaan..."
-            rows="5"
-        />
 
-        <flux:textarea
-            wire:model="requirements"
-            label="Persyaratan"
-            placeholder="Tuliskan kualifikasi yang dibutuhkan untuk posisi ini. Contoh: Pendidikan minimal D3/S1 Teknik Informatika, menguasai PHP dan Laravel, berpengalaman minimal 1 tahun di bidang yang relevan..."
-            rows="5"
-        />
-        <flux:input type="date" wire:model="deadline" max="2999-12-31" label="Deadline" />
-        <flux:field align="end">
-            <flux:label>Status</flux:label>
-             <flux:switch label="{{$this->status?'open':'closed'}}" wire:model.live="status" align="left"/>
-        </flux:field>
-        <flux:button variant="primary" class="cursor-pointer" wire:click="save">
-            Simpan
-        </flux:button>
+    <div class="w-full max-w-4xl flex flex-col gap-6">
+
+        {{-- Header --}}
+        <div class="flex items-start justify-between gap-4">
+            <flux:input type="text" wire:model="title" placeholder="Tuliskan judul lowongan" class="text-2xl font-bold"/>
+            <flux:button variant="primary" class="cursor-pointer" wire:click="save">Simpan</flux:button>
+        </div>
+
+        <flux:separator/>
+
+        {{-- Meta info --}}
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1">
+                <span class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Posisi</span>
+                @if(count($this->positions()) == 0)
+                    <flux:callout variant="warning" icon="exclamation-circle" heading="Posisi tidak tersedia!" />
+                @else
+                    <flux:select wire:model="position_id" placeholder="Pilih posisi...">
+                        @foreach($this->positions() as $post)
+                            <flux:select.option value="{{ $post->id }}">{{ $post->position_name }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                @endif
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <span class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Deadline</span>
+                <flux:input type="date" wire:model="deadline" max="2999-12-31"/>
+            </div>
+        </div>
+
+        <flux:separator/>
+
+        {{-- Deskripsi --}}
+        <div class="flex flex-col gap-2">
+            <span class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Deskripsi Pekerjaan</span>
+            <flux:textarea wire:model="description" rows="6"
+                placeholder="Jelaskan gambaran umum posisi ini, tanggung jawab utama, dan lingkungan kerja..."/>
+        </div>
+
+        <flux:separator/>
+
+        {{-- Persyaratan --}}
+        <div class="flex flex-col gap-2">
+            <span class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Persyaratan</span>
+            <flux:textarea wire:model="requirements" rows="6"
+                placeholder="Tuliskan kualifikasi yang dibutuhkan untuk posisi ini..."/>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <flux:badge color="{{ $status ? 'green' : 'zinc' }}" size="sm" inset="top bottom">
+                {{ $status ? 'Open' : 'Closed' }}
+            </flux:badge>
+            <flux:switch wire:model.live="status" align="left"/>
+        </div>
+
     </div>
 </div>
