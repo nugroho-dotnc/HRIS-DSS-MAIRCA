@@ -65,7 +65,7 @@ new  #[Layout('layouts::hr', ['page_title' => 'Vacancies'])] class extends Compo
                             <flux:table.cell>{{$vac->deadline}}</flux:table.cell>
                             <flux:table.cell><flux:badge color="green" size="sm" inset="top bottom">{{$vac->status}}</flux:badge></flux:table.cell>
                             <flux:table.cell variant="strong" class="space-x-2">
-                                <flux:button icon="book-open" size="sm" class="cursor-pointer">preview</flux:button>
+                                <flux:button icon="book-open" size="sm" class="cursor-pointer" href="{{ route('hr.vacancies.preview', $vac->id) }}" wire:navigate>preview</flux:button>
                                 <flux:button icon="trash" size="sm" class="cursor-pointer" wire:click="delete({{$vac->id}})" wire:confirm="yakin ingin menghapus lowongan ini?">delete</flux:button>
                             </flux:table.cell>
                         </flux:table.row>

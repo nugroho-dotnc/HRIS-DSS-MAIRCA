@@ -17,6 +17,7 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
     Route::livewire('/hr', 'pages::hr.dashboard')->name('hr.dashboard');
     Route::livewire('/hr/vacancies', 'pages::hr.vacancies')->name('hr.vacancies');
     Route::livewire('/hr/vacancies/create', 'pages::hr.vacancies.add-form')->name('hr.vacancies.create');
+    Route::livewire('/hr/vacancies/{id}', 'pages::hr.vacancies.preview')->name('hr.vacancies.preview');
 });
 
 // ─── Employee Routes ──────────────────────────────────────────────────────────
