@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
+// ─── Settings Routes (semua role yang sudah login bisa akses) ─────────────────
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -23,3 +24,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
         )
         ->name('security.edit');
 });
+

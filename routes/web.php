@@ -4,20 +4,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+// ─── Admin Routes ────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::view('/admin/departments', 'pages.admin.departments')->name('admin.departments');
+    Route::livewire('/admin/positions', 'pages::admin.positions')->name('admin.positions');
+    Route::livewire('/admin/dashboard', 'pages::admin.dashboard')->name('admin.dashboard');
+    Route::livewire('/admin/users', 'pages::admin.users')->name('admin.users');
 });
 
-Route::middleware(['auth', 'verified', 'role:admin'])->group( function(){
-        Route::view('/admin/departments','pages.admin.departments')->name('admin.departments');
-        Route::livewire('/admin/positions', 'pages::admin.positions')->name('admin.positions');
-        Route::livewire('/admin/dashboard', 'pages::admin.dashboard')->name('admin.dashboard');
-        Route::livewire('/admin/users', 'pages::admin.users')->name('admin.users');
-    });
+// ─── HR Routes ───────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
+    Route::livewire('/hr/dashboard', 'pages::hr.dashboard')->name('hr.dashboard');
+    Route::livewire('/hr/vacancies', 'pages::hr.vacancies')->name('hr.vacancies');
+});
 
-Route::middleware(['auth', 'verified', 'role:hr'])->group( function(){
-        Route::livewire('/hr/dashboard', 'pages::hr.dashboard')->name('hr.dashboard');
-        Route::livewire('/hr/vacancies', 'pages::hr.vacancies')->name('hr.vacancies');
-    });
+// ─── Employee Routes ──────────────────────────────────────────────────────────
+Route::middleware(['auth', 'verified', 'role:employee'])->group(function () {
+    Route::livewire('/employee/dashboard', 'pages::employee.dashboard')->name('employee.dashboard');
+});
 
 require __DIR__.'/settings.php';
