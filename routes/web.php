@@ -2,7 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::livewire('/', 'pages::welcome')->name('home');
+Route::livewire('/applications', 'pages::candidate.applications')->name('candidate.applications');
+Route::livewire('/vacancies', 'pages::candidate.vacancies')->name('candidate.vacancies');
+Route::livewire('/vacancies/{id}', 'pages::candidate.vacancies-show')->name('candidate.vacancies.show');
 
 // ─── Admin Routes ────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
