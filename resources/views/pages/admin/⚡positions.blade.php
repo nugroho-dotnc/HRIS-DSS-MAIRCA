@@ -84,7 +84,7 @@ new  #[Layout('layouts::admin', ['page_title' => 'Positions'])] class extends Co
 ?>
 
 <div>
-    <div class="flex flex-1 flex-col gap-4 rounded-xl">
+    <div class="flex flex-1 flex-col gap-8">
         <div class="flex justify-between items-center">
             <flux:input wire:model.live.debounce.300ms="search" class="w-full max-w-md" kbd="⌘K" icon="magnifying-glass" placeholder="Search..."/>
             <flux:modal.trigger name="add-positions">
