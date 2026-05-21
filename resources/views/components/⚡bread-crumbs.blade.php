@@ -13,12 +13,16 @@ new class extends Component
 
     protected function generate(): array
     {
-        $segments = request()->segments(); // ['admin', 'settings', 'edit']
-        $breadcrumbs = [['label' => 'Dashboard', 'url' => route('admin.dashboard')]];
+        $segments = request()->segments();
+        $breadcrumbs = [];
 
         $url = '';
         foreach ($segments as $segment) {
             $url .= '/' . $segment;
+
+            // skip segmen yang berupa angka (ID)
+            if (is_numeric($segment)) continue;
+
             $breadcrumbs[] = [
                 'label' => ucfirst(str_replace('-', ' ', $segment)),
                 'url'   => url($url),
