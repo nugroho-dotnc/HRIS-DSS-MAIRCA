@@ -7,11 +7,12 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new #[Title('Security settings')] class extends Component {
+new #[Title('Security settings')] #[Layout('layouts::settings')] class extends Component {
     use PasswordValidationRules;
 
     public string $current_password = '';
