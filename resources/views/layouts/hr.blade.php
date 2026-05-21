@@ -3,6 +3,7 @@
     <flux:main class="h-screen overflow-y-auto">
         <flux:heading size="xl">{{$page_title??null}}</flux:heading>
         <flux:subheading>{{$page_description??null}}</flux:subheading>
+        <div class="mt-5" />
         {{ $slot }}
     </flux:main>
 </x-layouts::app.hr-sidebar>
