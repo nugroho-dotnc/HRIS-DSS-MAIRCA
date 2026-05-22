@@ -20,9 +20,6 @@ new class extends Component
         foreach ($segments as $segment) {
             $url .= '/' . $segment;
 
-            // skip segmen yang berupa angka (ID)
-            if (is_numeric($segment)) continue;
-
             $breadcrumbs[] = [
                 'label' => ucfirst(str_replace('-', ' ', $segment)),
                 'url'   => url($url),
