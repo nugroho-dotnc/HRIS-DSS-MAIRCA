@@ -117,9 +117,9 @@ new  #[Layout('layouts::admin', ['page_title' => 'Positions'])] class extends Co
                         </flux:table.cell>
                         <flux:table.cell class="space-x-4">
                             <flux:switch :checked="$post->is_active" wire:click="toggleActive({{ $post->id }})"/>
-                            <flux:button icon="trash" size="sm" type="button" variant="danger" wire:click="delete({{$post->id}})" wire:confirm="Are you sure you want to delete this post?"></flux:button>
                             <flux:button class="cursor-pointer" size="sm" wire:click="edit({{$post->id}})" icon="pencil"/>
                             <flux:button class="cursor-pointer" size="sm" wire:click="toggleExpand({{$post->id}})" icon="cog-6-tooth"/>
+                            <flux:button icon="trash" size="sm" type="button" variant="danger" wire:click="delete({{$post->id}})" wire:confirm="Are you sure you want to delete this post?"></flux:button>
                         </flux:table.cell>
                     </flux:table.row>
                     {{-- Expandable row --}}
