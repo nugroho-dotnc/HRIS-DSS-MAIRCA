@@ -19,8 +19,10 @@ return new class extends Migration
             $table->enum('gender', ['L', 'P']);
             $table->string('city');
             $table->string('zip_code');
-            $table->string('cv_path');
-            $table->string('portofolio_path');
+            $table->string('cv_path')->nullable();
+            $table->string('portofolio_path')->nullable();
+            $table->string('web_portofolio_url')->nullable();
+            $table->text('complete_address');
             $table->text('experience');
             $table->timestamps();
         });

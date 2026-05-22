@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('department_id')->constrained('departments', 'id')->cascadeOnDelete();
             $table->string('position_name');
             $table->boolean('is_active')->default(true);
+            $table->unique(['department_id', 'position_name']);
             $table->timestamps();
         });
     }

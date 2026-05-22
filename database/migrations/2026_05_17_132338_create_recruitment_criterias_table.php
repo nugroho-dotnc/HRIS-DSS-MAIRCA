@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('position_id')->constrained('positions', 'id')->cascadeOnDelete();
             $table->string('name');
             $table->decimal('weight');
+            $table->text('description')->nullable();
             $table->enum('type', ['benefit', 'cost']);
             $table->timestamps();
         });
