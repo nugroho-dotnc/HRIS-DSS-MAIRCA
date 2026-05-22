@@ -6,6 +6,7 @@ Route::livewire('/', 'pages::welcome')->name('home');
 Route::livewire('/applications', 'pages::candidate.applications')->name('candidate.applications');
 Route::livewire('/vacancies', 'pages::candidate.vacancies')->name('candidate.vacancies');
 Route::livewire('/vacancies/{id}', 'pages::candidate.vacancies-show')->name('candidate.vacancies.show');
+Route::livewire('/vacancies/{id}/apply', 'pages::candidate.vacancies-apply')->name('candidate.vacancies.apply');
 
 // ─── Admin Routes ────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
