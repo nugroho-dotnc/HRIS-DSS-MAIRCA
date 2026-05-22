@@ -26,10 +26,13 @@
                     </flux:dropdown> --}}
                 </flux:navbar>
 
-                <flux:radio.group x-data size="sm" variant="segmented" x-model="$flux.appearance">
-                    <flux:radio value="light" icon="sun"/>
-                    <flux:radio value="dark" icon="moon"/>
-                </flux:radio.group>
+                <div class="flex gap-2">
+                    <flux:radio.group x-data size="sm" variant="segmented" x-model="$flux.appearance">
+                        <flux:radio value="light" icon="sun"/>
+                        <flux:radio value="dark" icon="moon"/>
+                    </flux:radio.group>
+                    <flux:button size="sm" variant="primary" wire:navigate href="{{ route('login') }}">SIGN IN</flux:button>
+                </div>
             </div>
         </div>
         <div class="pt-24">
