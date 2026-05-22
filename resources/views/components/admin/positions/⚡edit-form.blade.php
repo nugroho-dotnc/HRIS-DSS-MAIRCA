@@ -65,16 +65,16 @@ new class extends Component
         <flux:field>
             <flux:label>Department</flux:label>
             <flux:select wire:model="department_id" placeholder="Choose industry..." searchable>
-                    @forelse ($this->departments() as $dept)
-                    <flux:select.option value="{{ $dept->id }}" wire:key='{{ $dept->id }}'>
-                            {{ $dept->department_name }}
-                    </flux:select.option>
-                    @empty
-                    <flux:select.option selected disabled>
-                           Tidak ada department
-                    </flux:select.option>
-                    @endforelse
-                </flux:select>
+                @forelse ($this->departments() as $dept)
+                <flux:select.option value="{{ $dept->id }}" wire:key='{{ $dept->id }}'>
+                        {{ $dept->department_name }}
+                </flux:select.option>
+                @empty
+                <flux:select.option selected disabled>
+                        Tidak ada department
+                </flux:select.option>
+                @endforelse
+            </flux:select>
             <flux:error name="department_id" />
         </flux:field>
 

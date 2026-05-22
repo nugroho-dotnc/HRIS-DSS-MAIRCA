@@ -1,0 +1,158 @@
+// ============================================
+// HRIS + DSS SYSTEM — dbdiagram.io schema
+// ============================================
+
+// ─── CORE ────────────────────────────────────
+
+
+
+Table users {
+  id int [pk, increment]
+  name varchar [not null]
+  email varchar [unique, not null]
+  password varchar [not null]
+  role enum('admin', 'hr', 'employee', 'supervisor', 'candidate') [default: 'candidate']
+  status enum('active', 'inactive') [default: 'active']
+  created_at timestamp [default: `now()`]
+}
+
+Table departments {
+  id int [pk, increment]
+  department_name varchar [not null]
+}
+
+Table positions {
+  id int [pk, increment]
+  department_id int [ref: > departments.id, not null]
+  position_name varchar [not null]
+}
+
+// ─── DSS CRITERIA ────────────────────────────
+
+Table dss_criteria {
+  id int [pk, increment]
+  position_id int [ref: > positions.id, not null]
+  name varchar [not null]
+  weight decimal [not null, note: '0.00 - 1.00, total per position_id harus = 1']
+  type enum('benefit', 'cost') [default: 'benefit']
+  context enum('recruitment', 'best_employee') [default: 'recruitment']
+  created_at timestamp [default: `now()`]
+}
+
+// ─── RECRUITMENT MODULE ───────────────────────
+
+Table vacancies {
+  id int [pk, increment]
+  hr_id int [ref: > users.id, not null]
+  position_id int [ref: > positions.id, not null]
+  title varchar [not null]
+  description text
+  requirements text
+  deadline date
+  status enum('open', 'closed') [default: 'open']
+  created_at timestamp [default: `now()`]
+}
+
+Table candidates {
+  id int [pk, increment]
+  name varchar
+  email varchar
+  phone varchar
+  gender varchar
+  city varchar
+  zip_code varchar
+  cv_path varchar
+  portfolio_path varchar
+  experience text
+}
+
+Table applications {
+  id int [pk, increment]
+  candidate_id int [ref: > candidates.id, not null]
+  vacancy_id int [ref: > vacancies.id, not null]
+  status enum('applied', 'screening', 'interview_scheduled', 'interview_done', 'hired', 'rejected') [default: 'applied']
+  applied_at timestamp [default: `now()`]
+}
+
+Table interview_sessions {
+  id int [pk, increment]
+  application_id int [ref: > applications.id, not null]
+  interviewer_id int [ref: > users.id, not null]
+  interview_date datetime
+  notes text
+}
+
+Table interview_scores {
+  id int [pk, increment]
+  session_id int [ref: > interview_sessions.id, not null]
+  criteria_id int [ref: > dss_criteria.id, not null]
+  score decimal [not null, note: '0 - 100']
+}
+
+Table recruitment_results {
+  id int [pk, increment]
+  application_id int [ref: > applications.id, not null]
+  final_score decimal
+  ranking int
+  decision enum('hired', 'rejected')
+  calculated_at timestamp [default: `now()`]
+}
+
+// ─── EMPLOYEE MODULE ──────────────────────────
+
+Table employees {
+  id int [pk, increment]
+  user_id int [ref: > users.id, not null]
+  department_id int [ref: > departments.id, not null]
+  position_id int [ref: > positions.id, not null]
+  supervisor_id int [ref: > employees.id, note: 'self-referencing']
+  join_date date
+  contract_status enum('permanent', 'contract', 'probation') [default: 'probation']
+}
+
+Table attendance {
+  id int [pk, increment]
+  employee_id int [ref: > employees.id, not null]
+  date date [not null]
+  check_in time
+  check_out time
+  status enum('present', 'late', 'absent', 'leave') [default: 'present']
+}
+
+Table leaves {
+  id int [pk, increment]
+  employee_id int [ref: > employees.id, not null]
+  leave_type enum('sick', 'annual', 'emergency') [not null]
+  start_date date [not null]
+  end_date date [not null]
+  reason text
+  approval_status enum('pending', 'approved', 'rejected') [default: 'pending']
+  approved_by int [ref: > users.id]
+  created_at timestamp [default: `now()`]
+}
+
+// ─── DSS BEST EMPLOYEE (phase 2) ─────────────
+
+Table kpi_evaluations {
+  id int [pk, increment]
+  employee_id int [ref: > employees.id, not null]
+  supervisor_id int [ref: > users.id, not null]
+  month int [not null, note: '1 - 12']
+  year int [not null]
+  productivity_score decimal [note: 'input manual supervisor, 0 - 100']
+  discipline_score decimal [note: 'input manual supervisor, 0 - 100']
+  attendance_rate decimal [note: 'kalkulasi otomatis dari tabel attendance']
+  punctuality_rate decimal [note: 'kalkulasi otomatis dari tabel attendance']
+  created_at timestamp [default: `now()`]
+}
+
+Table best_employee_results {
+  id int [pk, increment]
+  employee_id int [ref: > employees.id, not null]
+  month int [not null]
+  year int [not null]
+  final_score decimal
+  ranking int
+  is_best_employee boolean [default: false]
+  calculated_at timestamp [default: `now()`]
+}

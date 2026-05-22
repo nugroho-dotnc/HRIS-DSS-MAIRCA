@@ -20,7 +20,6 @@ class UserSeeder extends Seeder
                 'email'    => 'admin@hris.com',
                 'password' => Hash::make('password'),
                 'role'     => 'admin',
-                'status'   => 'active',
             ],
             // HR
             [
@@ -28,14 +27,12 @@ class UserSeeder extends Seeder
                 'email'    => 'sari.dewi@hris.com',
                 'password' => Hash::make('password'),
                 'role'     => 'hr',
-                'status'   => 'active',
             ],
             [
                 'name'     => 'Budi Santoso',
                 'email'    => 'budi.santoso@hris.com',
                 'password' => Hash::make('password'),
                 'role'     => 'hr',
-                'status'   => 'active',
             ],
             // Supervisor
             [
@@ -43,14 +40,12 @@ class UserSeeder extends Seeder
                 'email'    => 'rina.agustina@hris.com',
                 'password' => Hash::make('password'),
                 'role'     => 'supervisor',
-                'status'   => 'active',
             ],
             [
                 'name'     => 'Doni Pratama',
                 'email'    => 'doni.pratama@hris.com',
                 'password' => Hash::make('password'),
                 'role'     => 'supervisor',
-                'status'   => 'active',
             ],
             // Employee
             [
@@ -58,28 +53,24 @@ class UserSeeder extends Seeder
                 'email'    => 'andi.wijaya@hris.com',
                 'password' => Hash::make('password'),
                 'role'     => 'employee',
-                'status'   => 'active',
             ],
             [
                 'name'     => 'Lestari Putri',
                 'email'    => 'lestari.putri@hris.com',
                 'password' => Hash::make('password'),
                 'role'     => 'employee',
-                'status'   => 'active',
             ],
             [
                 'name'     => 'Fajar Nugroho',
                 'email'    => 'fajar.nugroho@hris.com',
                 'password' => Hash::make('password'),
                 'role'     => 'employee',
-                'status'   => 'active',
             ],
             [
                 'name'     => 'Maya Sari',
                 'email'    => 'maya.sari@hris.com',
                 'password' => Hash::make('password'),
                 'role'     => 'employee',
-                'status'   => 'inactive',
             ],
             // Candidate
             [
@@ -87,14 +78,12 @@ class UserSeeder extends Seeder
                 'email'    => 'rizky.aditya@gmail.com',
                 'password' => Hash::make('password'),
                 'role'     => 'candidate',
-                'status'   => 'active',
             ],
             [
                 'name'     => 'Nita Rahayu',
                 'email'    => 'nita.rahayu@gmail.com',
                 'password' => Hash::make('password'),
                 'role'     => 'candidate',
-                'status'   => 'active',
             ],
         ];
 

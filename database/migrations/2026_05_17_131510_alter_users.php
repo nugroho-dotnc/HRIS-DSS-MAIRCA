@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function(Blueprint $table){
             $table->enum('role', ['admin', 'hr', 'supervisor', 'candidate', 'employee']);
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->boolean("is_active")->default(true);
         });
     }
 
@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('users', function(Blueprint $table){
             $table->dropColumn('role');
-            $table->dropColumn('status');
+            $table->dropColumn('is_active');
         });
     }
 };
