@@ -7,7 +7,9 @@
         <div class="w-full fixed top-0 z-99 bg-white dark:bg-zinc-800">
             <div class="w-full max-w-5xl mx-auto h-24 flex items-center justify-between px-6 ">
                 <flux:heading size="xl" href="{{ route('home') }}" wire:navigate class="cursor-pointer">
-                    EVoU
+                    <h1 class="font-extrabold">
+                        EVoU
+                    </h1>
                 </flux:heading>
 
                 <flux:navbar>
