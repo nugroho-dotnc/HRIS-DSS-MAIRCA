@@ -1,0 +1,512 @@
+﻿1. Pendahuluan
+1.1 Tujuan Dokumen
+Dokumen ini adalah Software Requirements Specification (SRS) untuk aplikasi HRIS MAIRCA, sebuah sistem informasi manajemen sumber daya manusia yang mengintegrasikan Decision Support System (DSS) berbasis metode MAIRCA (Multi-Attributive Ideal-Real Comparative Analysis) untuk proses rekrutmen karyawan.
+ 
+Dokumen ini menjelaskan scope sistem, aktor yang terlibat, alur proses, dan spesifikasi fungsional dari masing-masing role dalam aplikasi. Scope yang dicakup pada versi ini adalah modul rekrutmen. Fitur best employee tidak termasuk dalam scope saat ini.
+ 
+1.2 Scope Sistem
+HRIS MAIRCA mencakup:
+•        Manajemen master data: departemen, posisi, pengguna.
+•        Proses rekrutmen end-to-end: buka lowongan, lamaran kandidat, screening, jadwal interview, penilaian MAIRCA, keputusan rekrutmen.
+•        Manajemen akun untuk role internal (Admin, HR, Supervisor, Employee) dan akses publik untuk Candidate.
+•        DSS berbasis MAIRCA untuk pemeringkatan kandidat dalam proses seleksi.
+ 
+Yang tidak termasuk dalam scope versi ini:
+•        Modul Best Employee (MAIRCA evaluasi karyawan bulanan).
+•        Modul absensi dan cuti.
+•        Modul payroll.
+ 
+1.3 Definisi dan Singkatan
+Istilah
+	Definisi
+	MAIRCA
+	Multi-Attributive Ideal-Real Comparative Analysis — metode DSS yang digunakan untuk pemeringkatan kandidat.
+	DSS
+	Decision Support System — sistem pendukung keputusan berbasis data.
+	HR
+	Human Resource — role pengelola proses administrasi dan rekrutmen.
+	Candidate
+	Pengguna eksternal yang melamar pekerjaan melalui sistem.
+	Vacancy
+	Lowongan pekerjaan yang dibuka oleh HR.
+	Application
+	Record lamaran kerja yang dibuat ketika Candidate apply ke Vacancy.
+	Application Code
+	Kode unik yang digenerate sistem saat Candidate berhasil apply, digunakan untuk tracking lamaran tanpa login.
+	Screening
+	Tahap review awal lamaran sebelum kandidat dijadwalkan interview.
+	KPS
+	Tidak digunakan dalam scope ini.
+	 
+1.4 Referensi
+•        Database Schema HRIS MAIRCA (DBML — dbdiagram.io)
+•        Dokumen Revisi Flow 2 — HRIS MAIRCA Internal
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. Overview Sistem
+2.1 Deskripsi Umum
+HRIS MAIRCA adalah aplikasi web berbasis Laravel yang membantu proses rekrutmen perusahaan dengan mengintegrasikan metode MAIRCA sebagai engine pemeringkatan kandidat. Sistem ini menghilangkan bias subjektif dalam seleksi dengan memberikan skor terbobot berdasarkan kriteria yang sudah dikonfigurasi.
+ 
+Alur utama sistem:
+1.         HR membuka lowongan pekerjaan (Vacancy).
+2.         Candidate — tanpa perlu registrasi — bisa melihat seluruh lowongan yang tersedia.
+3.         Candidate yang ingin melamar wajib melengkapi data diri terlebih dahulu, lalu submit lamaran.
+4.         Sistem menerbitkan Application Code unik sebagai bukti lamaran.
+5.         HR mereview lamaran dan menentukan siapa yang lanjut ke tahap interview.
+6.         HR menjadwalkan sesi interview dan mengisi skor per kriteria MAIRCA setelah interview selesai.
+7.         Sistem menghitung ranking MAIRCA secara otomatis.
+8.         HR menetapkan keputusan final: hired atau rejected.
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2.2 Database Schema
+  
+
+	 
+2.3 Diagram Alur Aplikasi
+
+
+	 
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3. Aktor dan Role
+Aplikasi HRIS MAIRCA memiliki 5 role utama:
+Role
+	Tipe
+	Deskripsi Singkat
+	Admin
+	Internal
+	Pengelola sistem, master data, dan konfigurasi DSS.
+	HR
+	Internal
+	Pengelola seluruh proses rekrutmen dari buka lowongan sampai keputusan final.
+	Supervisor
+	Internal
+	Pengelola tim, validasi kehadiran, dan input KPI bawahannya. Scope terbatas pada scope non-rekrutmen.
+	Employee
+	Internal
+	Karyawan aktif — mengelola data pribadinya sendiri.
+	Candidate
+	Eksternal
+	Pelamar kerja dari luar perusahaan. Tidak wajib registrasi untuk melihat lowongan, tapi wajib melengkapi data saat apply.
+	 
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4. Spesifikasi Role
+4.1 Admin
+Admin adalah pengelola sistem, bukan pengelola proses HR. Ini perbedaan penting yang sering tertukar dengan role HR.
+ 
+Prinsip utama: Admin tidak ikut campur proses rekrutmen. Admin hanya memastikan sistem dapat berjalan untuk semua role lain.
+ 
+4.1.1 Use Case Diagram
+  
+
+	 
+4.1.2 Tanggung Jawab
+1. Manage Users — Membuat, mengedit, dan menonaktifkan akun pengguna internal (HR, Supervisor, Employee). Akun Candidate dibuat sendiri oleh Candidate saat melengkapi data lamaran.
+2. Manage Roles — Memastikan setiap user memiliki role yang benar. Contoh: karyawan yang naik jabatan menjadi Supervisor diubah rolenya oleh Admin.
+3.  Manage Departments & Positions — Membuat dan mengelola master data departemen dan posisi yang dipakai di seluruh modul.
+4. Manage DSS Criteria & Weights — Mengelola kriteria dan bobot MAIRCA untuk proses rekrutmen. Perubahan bobot kriteria dilakukan melalui Admin.
+5. Access System Reports — Melihat laporan rekap rekrutmen lintas divisi. Sifatnya read-only.
+ 
+4.1.3 Batasan Role
+Aksi
+	Yang Bertanggung Jawab
+	Buat job vacancy
+	HR
+	Input skor interview
+	HR
+	Approve cuti
+	Supervisor / HR (di luar scope versi ini)
+	Input KPI karyawan
+	Supervisor (di luar scope versi ini)
+	Onboarding employee baru
+	HR
+	 
+4.2 Human Resource (HR)
+HR adalah pengelola proses — mulai dari membuka lowongan sampai kandidat dinyatakan hired dan dibuatkan data employee. Kalau Admin mengatur sistemnya, HR yang menjalankan bisnisnya.
+ 
+4.2.1 Use Case Diagram
+[ DIAGRAM: Use Case Diagram — HR ]
+	 
+4.2.2 Tanggung Jawab
+14.  Manage Job Vacancy — HR membuat lowongan baru, mengisi detail posisi, deskripsi, requirements, departemen, dan deadline. HR juga menutup vacancy jika posisi sudah terisi. Tabel terkait: vacancies.
+15.  Review Lamaran Masuk — HR melihat semua lamaran yang masuk dan memutuskan apakah kandidat lanjut ke interview atau tidak.
+ 
+[ DIAGRAM: Flow: Review Lamaran (applied → screening → interview_scheduled / rejected) ]
+	 
+16.  Manage Interview Sessions — HR menjadwalkan sesi interview untuk kandidat yang lolos screening: menentukan tanggal, waktu, dan interviewer. Tabel terkait: interview_sessions.
+17.  Input Interview Scores (DSS MAIRCA Rekrutmen) — Setelah interview selesai, HR mengisi skor per kriteria MAIRCA untuk setiap kandidat. Sistem menghitung ranking secara otomatis. Tabel terkait: interview_scores, recruitment_criterias, recruitment_results.
+ 
+[ DIAGRAM: Flow: Input Skor → Kalkulasi MAIRCA → Ranking Otomatis ]
+	 
+18.  Keputusan Final Rekrutmen — HR melihat hasil ranking MAIRCA dan menetapkan keputusan akhir: hired atau rejected untuk setiap kandidat. Tabel terkait: recruitment_results.
+19.  Employee Onboarding — Kandidat yang dinyatakan hired dibuatkan data employee oleh sistem. HR memverifikasi dan melengkapi data: tanggal bergabung, posisi, departemen, supervisor. Tabel terkait: employees.
+20.  Manage Employee Records — HR bisa melihat dan mengedit data karyawan aktif: kontrak, posisi, departemen. Tabel terkait: employees.
+ 
+4.2.3 Batasan Role
+Aksi
+	Yang Bertanggung Jawab
+	Manage users & roles
+	Admin
+	Manage departments & positions
+	Admin
+	Manage DSS criteria & weights
+	Admin
+	Validasi attendance harian
+	Supervisor (di luar scope versi ini)
+	Monitor performa tim
+	Supervisor (di luar scope versi ini)
+	 
+4.3 Supervisor
+Supervisor adalah pengelola tim. Dalam scope versi ini, peran Supervisor sangat terbatas karena fokusnya berada di modul absensi dan KPI yang belum diimplementasi. Role ini tetap ada di sistem sebagai persiapan untuk scope berikutnya.
+ 
+4.3.1 Use Case Diagram
+[ DIAGRAM: Use Case Diagram — Supervisor ]
+	 
+4.3.2 Tanggung Jawab (Scope Saat Ini)
+Pada versi ini, Supervisor belum memiliki tanggung jawab aktif. Module Supervisor akan aktif penuh pada scope berikutnya ketika modul absensi dan evaluasi karyawan diimplementasi.
+ 
+4.3.3 Batasan Role
+Aksi
+	Bisa?
+	Lihat data karyawan tim sendiri
+	Tergantung implementasi berikutnya
+	Edit data karyawan
+	Tidak — domain HR
+	Buat job vacancy
+	Tidak — domain HR
+	Input skor interview MAIRCA
+	Tidak — domain HR
+	Lihat data karyawan divisi lain
+	Tidak
+	Manage users & roles
+	Tidak — domain Admin
+	 
+4.4 Employee
+Employee adalah pengguna akhir dari sistem — dia tidak mengelola orang lain, hanya berinteraksi dengan data miliknya sendiri. Dalam scope versi ini, akses Employee sangat terbatas karena modul absensi dan KPI belum diimplementasi.
+ 
+4.4.1 Use Case Diagram
+[ DIAGRAM: Use Case Diagram — Employee ]
+	 
+4.4.2 Tanggung Jawab (Scope Saat Ini)
+21.  Update Profile — Employee memperbarui informasi pribadinya: nomor telepon, alamat, foto profil. Data kepegawaian inti (posisi, departemen) tidak bisa diubah sendiri. Tabel terkait: users, employees.
+22.  Lihat Data Kepegawaian — Employee bisa melihat informasi kepegawaiannya sendiri: posisi, departemen, supervisor, tanggal bergabung, dan status kontrak. Read-only.
+ 
+4.4.3 Batasan Role
+Aksi
+	Bisa?
+	Lihat data kepegawaian sendiri
+	Ya
+	Edit posisi / departemen sendiri
+	Tidak — domain HR
+	Lihat data karyawan lain
+	Tidak
+	Akses modul rekrutmen
+	Tidak
+	Input absensi
+	Di luar scope versi ini
+	Ajukan cuti
+	Di luar scope versi ini
+	 
+4.5 Candidate
+Candidate adalah pengguna eksternal — satu-satunya role yang berasal dari luar perusahaan. Candidate tidak wajib registrasi untuk melihat lowongan. Registrasi hanya diperlukan saat Candidate ingin melamar pekerjaan.
+ 
+Setelah dinyatakan hired, akun Candidate otomatis dikonversi menjadi Employee oleh sistem.
+ 
+4.5.1 Use Case Diagram
+[ DIAGRAM: Use Case Diagram — Candidate ]
+	 
+4.5.2 Tanggung Jawab
+23.  Lihat Job Vacancy (tanpa login) — Candidate bisa mengakses halaman lowongan secara publik tanpa perlu registrasi. Semua vacancy berstatus open dapat dilihat lengkap dengan deskripsi, requirements, departemen, dan deadline. Tabel terkait: vacancies.
+24.  Lengkapi Data Diri (saat akan apply) — Ketika Candidate memilih untuk melamar, sistem meminta Candidate melengkapi data: nama, email, nomor telepon, jenis kelamin, kota, kode pos, upload CV, upload portofolio, dan ringkasan pengalaman. Data ini disimpan ke tabel candidates. Tabel terkait: candidates, users.
+25.  Apply Lamaran — Candidate submit lamaran ke vacancy yang dipilih. Sistem membuat record baru di tabel applications dengan status applied dan menerbitkan Application Code yang unik. Tabel terkait: applications.
+ 
+[ DIAGRAM: Flow: Candidate Apply → Sistem Generate Application Code → Notifikasi ke Candidate ]
+	 
+26.  Tracking Lamaran via Application Code — Candidate bisa memantau status lamarannya menggunakan Application Code tanpa perlu login. Sistem menampilkan posisi lamaran dalam pipeline rekrutmen.
+ 
+[ DIAGRAM: Flow Tracking: applied → screening → interview_scheduled → interview_done → hired / rejected ]
+	 
+4.5.3 Batasan Role
+Aksi
+	Bisa?
+	Lihat vacancy yang open (tanpa login)
+	Ya
+	Apply ke vacancy (perlu isi data diri)
+	Ya
+	Tracking status lamaran via Application Code
+	Ya
+	Lihat lamaran candidate lain
+	Tidak
+	Lihat hasil skor MAIRCA miliknya
+	Tidak — internal HR
+	Akses data karyawan
+	Tidak
+	Akses modul absensi / cuti / KPI
+	Tidak
+	 
+
+
+ 
+5. DSS MAIRCA — Rekrutmen
+5.1 Deskripsi
+MAIRCA (Multi-Attributive Ideal-Real Comparative Analysis) digunakan untuk meranking kandidat yang telah melewati tahap interview. Output dari proses MAIRCA adalah ranking kandidat berdasarkan total gap antara nilai ideal dan nilai riil masing-masing kriteria, dengan bobot yang sudah dikonfigurasi.
+ 
+5.2 Alternatif dan Kriteria
+Alternatif: Kandidat yang telah melewati tahap interview (status application: interview_done).
+ 
+Kriteria default: (dapat diubah oleh Admin)
+Kriteria
+	Bobot
+	Tipe
+	Format Input
+	Communication Skill
+	20%
+	Benefit
+	Skala Likert / Nilai 1-100
+	Technical Skill
+	30%
+	Benefit
+	Skala Likert / Nilai 1-100
+	Problem Solving
+	20%
+	Benefit
+	Skala Likert / Nilai 1-100
+	Adaptability
+	15%
+	Benefit
+	Skala Likert / Nilai 1-100
+	Teamwork
+	10%
+	Benefit
+	Skala Likert / Nilai 1-100
+	Experience
+	5%
+	Benefit
+	Skala Likert / Nilai 1-100
+	 
+Total bobot harus selalu bernilai 100%. Validasi dilakukan oleh sistem saat Admin menyimpan perubahan kriteria.
+Tipe data per kriteria bisa berupa kuantitatif (nilai numerik langsung) atau kualitatif (berbasis skala Likert yang dikonfigurasi di tabel likert_scales). Konfigurasi ini dilakukan Admin per kriteria.
+ 
+5.3 Alur Kalkulasi
+[ DIAGRAM: Flow: Input Skor per Kriteria → Normalisasi → Bobot → Gap Ideal-Riil → Ranking MAIRCA ]
+	 
+Tabel terkait: interview_scores, recruitment_criterias, likert_scales, recruitment_results.
+ 
+5.4 Output
+•        Ranking kandidat berdasarkan skor MAIRCA final.
+•        Skor ditampilkan ke HR dalam bentuk tabel perbandingan kandidat.
+•        HR menggunakan ranking sebagai basis keputusan final, namun tetap bisa override secara manual.
+•        Keputusan final disimpan di tabel recruitment_results dengan field decission: hired atau rejected.
+ 
+
+
+ 
+6. Alur Rekrutmen End-to-End
+[ DIAGRAM: Flow Diagram Rekrutmen — End-to-End (Vacancy → Application → Screening → Interview → MAIRCA → Decision → Onboarding) ]
+	 
+6.1 Tahapan Status Application
+Status
+	Deskripsi
+	Siapa yang Mengubah
+	applied
+	Lamaran masuk dari Candidate.
+	Sistem (otomatis saat apply)
+	screening
+	Lamaran sedang direview oleh HR.
+	HR
+	interview_scheduled
+	Kandidat dijadwalkan untuk interview.
+	HR
+	interview_done
+	Interview selesai, HR sudah input skor.
+	HR / Sistem
+	hired
+	Kandidat diterima berdasarkan hasil MAIRCA dan keputusan HR.
+	HR
+	rejected
+	Kandidat ditolak di tahap manapun.
+	HR
+	 
+
+
+ 
+7. Kebutuhan Non-Fungsional
+7.1 Keamanan
+•        Setiap role hanya bisa mengakses endpoint dan data yang sesuai dengan hak aksesnya (role-based access control).
+•        Kandidat yang mengakses tracking lamaran via Application Code tidak bisa melihat data kandidat lain.
+•        Data CV dan portofolio disimpan di storage server dan tidak dapat diakses langsung tanpa autentikasi.
+ 
+7.2 Performa
+•        Kalkulasi MAIRCA diproses di sisi server setelah semua skor diinput, bukan secara real-time per perubahan input.
+•        Halaman daftar vacancy publik harus bisa diakses tanpa hambatan login.
+ 
+7.3 Usability
+•        Kandidat tidak perlu memahami alur sistem — cukup lihat lowongan, isi data, apply, dan tracking via kode.
+•        HR mendapatkan tampilan ranking MAIRCA yang jelas sebelum mengambil keputusan final.
+ 
+
+
+ 
+8. Database — Tabel Utama
+Database mengikuti schema yang sudah didefinisikan di dbdiagram.io. Berikut adalah tabel-tabel utama yang digunakan dalam scope rekrutmen:
+ 
+Tabel
+	Fungsi
+	users
+	Akun pengguna sistem untuk semua role internal.
+	departments
+	Master data departemen.
+	positions
+	Master data posisi, terhubung ke departemen.
+	employees
+	Data kepegawaian karyawan aktif.
+	vacancies
+	Lowongan pekerjaan yang dibuat HR.
+	candidates
+	Data personal dan dokumen kandidat pelamar.
+	applications
+	Record lamaran per kandidat per vacancy, berisi application_code.
+	recruitment_criterias
+	Kriteria MAIRCA dan bobotnya per posisi.
+	likert_scales
+	Definisi skala Likert per kriteria (jika tipe kualitatif).
+	interview_sessions
+	Jadwal dan catatan sesi interview.
+	interview_scores
+	Skor per kriteria MAIRCA yang diisi HR per sesi interview.
+	recruitment_results
+	Hasil kalkulasi MAIRCA dan keputusan final per aplikasi.
+	 
+
+
+ 
+9. Open Issues & Keputusan yang Belum Final
+#
+	Isu
+	Status
+	Catatan
+	1
+	Format nilai kriteria: skala Likert vs nilai 1-100
+	Belum final
+	Perlu research lebih lanjut. Saat ini keduanya didukung sistem via field data_type di recruitment_criterias.
+	2
+	Siapa yang bisa jadi interviewer di interview_sessions: HR saja atau bisa Supervisor?
+	Belum final
+	Schema saat ini hanya ref ke users.id. Perlu ditentukan validasi role.
+	3
+	Override keputusan HR setelah ranking MAIRCA: apakah perlu approval kedua?
+	Belum final
+	Saat ini HR bisa langsung override tanpa approval tambahan.
+	4
+	Modul Supervisor: kapan diaktifkan?
+	Ditunda
+	Masuk scope versi berikutnya bersamaan dengan modul absensi dan evaluasi.
