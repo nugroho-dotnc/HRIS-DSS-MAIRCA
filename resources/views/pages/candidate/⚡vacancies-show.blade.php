@@ -19,7 +19,7 @@ new #[Layout('layouts::guest')] class extends Component
 <div>
     <div class="flex flex-1 flex-col gap-6 rounded-xl">
         <div class="w-full flex flex-col gap-6">
-
+            <livewire:bread-crumbs/>
             {{-- Header --}}
             <div class="flex items-start justify-between gap-4">
                 <div class="flex flex-col gap-1">
@@ -98,6 +98,8 @@ new #[Layout('layouts::guest')] class extends Component
                     <flux:button
                         variant="primary" class="cursor-pointer"
                         size="sm"
+                        href="{{ route('candidate.vacancies.apply', $this->id) }}"
+                        wire:navigate
                         >
                         Lamar Sekarang
                     </flux:button>

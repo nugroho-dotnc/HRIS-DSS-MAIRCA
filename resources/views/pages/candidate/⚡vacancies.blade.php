@@ -11,6 +11,10 @@ new #[Layout('layouts::guest')] class extends Component
     use WithPagination;
     public $search = '';
 
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
     #[Computed]
     public function vacancies(){
         return Vacancies::with('Position')
