@@ -3,10 +3,11 @@
 use App\Models\Vacancies;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\WithFileUploads;
 
 new #[Layout('layouts::guest')] class extends Component
 {
-    //
+    use WithFileUploads;
     public $id;
     public $vacancy;
 
