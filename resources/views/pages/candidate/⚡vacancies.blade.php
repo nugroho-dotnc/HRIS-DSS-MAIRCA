@@ -27,16 +27,16 @@ new #[Layout('layouts::guest')] class extends Component
 ?>
 
 <div>
-    <section class="flex flex-col gap-6 items-center justify-start" id="vacancies">
-        <h1 class="text-2xl font-bold">Lowongan pekerjaan di EVoU</h1>
-        <p class="text-center w-full max-w-3xl">
+    <section class="flex flex-col gap-4 md:gap-6 items-center justify-start" id="vacancies">
+        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-center">Lowongan pekerjaan di EVoU</h1>
+        <p class="text-center w-full max-w-3xl text-sm md:text-base">
             Temukan peluang karier terbaik sesuai minat dan keahlianmu. Gunakan fitur pencarian untuk menjelajahi lowongan dari berbagai perusahaan dan mulai langkah barumu hari ini.
         </p>
 
-        <flux:input wire:model.live.debounce.300ms="search" type="text" class="w-full max-w-md" kbd="⌘K" icon="magnifying-glass" placeholder="Search..."/>
+        <flux:input wire:model.live.debounce.300ms="search" type="text" class="w-full max-w-xs md:max-w-md" kbd="⌘K" icon="magnifying-glass" placeholder="Search..."/>
 
         @if($this->vacancies->count() > 0)
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mt-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 w-full mt-4 md:mt-6">
                 @foreach ($this->vacancies as $vacancy)
                     <a href="{{ route('candidate.vacancies.show', $vacancy->id) }}" aria-label="{{ $vacancy->title }}">
                         <flux:card class="hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors h-full">
@@ -63,7 +63,7 @@ new #[Layout('layouts::guest')] class extends Component
                 <flux:pagination :paginator="$this->vacancies" />
             </div>
         @else
-            <flux:callout inline class="max-w-xl w-full mx-auto mt-12 ">
+            <flux:callout inline class="max-w-xl w-full mx-auto mt-8 md:mt-12 ">
                 <flux:callout.heading icon="briefcase">Lowongan Tidak Ditemukan</flux:callout.heading>
                 <flux:callout.text>
                     Belum ada lowongan yang sesuai dengan pencarian Anda. Coba gunakan kata kunci lain atau jelajahi peluang kerja lainnya yang tersedia.

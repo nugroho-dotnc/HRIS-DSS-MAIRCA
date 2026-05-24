@@ -15,23 +15,23 @@ new #[Layout('layouts::guest')] class extends Component
 
 <div>
     @if($applicationCode)
-        <section class="flex flex-col gap-6 items-center justify-center min-h-[60vh]" id="vacancies">
-            <h1 class="text-2xl font-bold text-center">
+        <section class="flex flex-col gap-4 md:gap-6 items-center justify-center min-h-[60vh] px-2" id="vacancies">
+            <h1 class="text-xl md:text-2xl font-bold text-center">
                 Lamaran berhasil dikirim!
             </h1>
 
-            <p class="text-center w-full max-w-3xl">
+            <p class="text-center w-full max-w-3xl text-sm md:text-base">
                 Terima kasih telah melamar. Simpan kode aplikasi di bawah ini untuk melacak perkembangan proses rekrutmen Anda melalui halaman
                 <a class="font-semibold cursor-pointer" href="{{route('candidate.applications')}}">Applications</a>.
             </p>
 
             <div
                 x-data="{ copied: false }"
-                class="p-6 border-2 border-teal-600 rounded-xl bg-teal-600/10 flex items-center gap-4"
+                class="w-full max-w-sm p-4 md:p-6 border-2 border-teal-600 rounded-xl bg-teal-600/10 flex items-center justify-between gap-4"
             >
-                <h1 class="text-xl font-bold tracking-[0.2em] text-teal-700 dark:text-teal-400">
+                <h2 class="text-lg md:text-xl font-bold tracking-[0.2em] text-teal-700 dark:text-teal-400 break-all">
                     {{ $this->applicationCode }}
-                </h1>
+                </h2>
 
                 <flux:button
                     type="button"
@@ -49,7 +49,7 @@ new #[Layout('layouts::guest')] class extends Component
                 </flux:button>
             </div>
 
-            <p class="text-sm text-center opacity-80">
+            <p class="text-xs md:text-sm text-center opacity-80">
                 Kode dapat disalin dan digunakan untuk tracking status lamaran Anda.
             </p>
         </section>

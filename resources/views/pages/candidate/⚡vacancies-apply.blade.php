@@ -150,11 +150,11 @@ new #[Layout('layouts::guest')] class extends Component
 };
 ?>
 
-<div class="flex flex-1 flex-col gap-6 rounded-xl">
+<div class="flex flex-1 flex-col gap-4 md:gap-6 rounded-xl">
     <livewire:bread-crumbs/>
-    <div class="flex items-start justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div class="flex flex-col gap-1">
-            <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $vacancy->title }}</h1>
+            <h1 class="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white">{{ $vacancy->title }}</h1>
             <span class="text-sm text-zinc-400">{{ $vacancy->Position->position_name }}</span>
         </div>
         <div class="flex items-center gap-2">
@@ -163,8 +163,8 @@ new #[Layout('layouts::guest')] class extends Component
             </flux:badge>
         </div>
     </div>
-    <flux:fieldset class="space-y-6">
-        <div class="grid grid-cols-2 gap-x-4 gap-y-6">
+    <flux:fieldset class="space-y-4 md:space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 md:gap-y-6">
             <flux:input
                 label="Nama"
                 placeholder="ex: Jane Doe"
@@ -199,7 +199,7 @@ new #[Layout('layouts::guest')] class extends Component
 
     <flux:separator text="address"/>
 
-    <flux:fieldset class="grid grid-cols-2 gap-x-4 gap-y-6">
+    <flux:fieldset class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 md:gap-y-6">
         <flux:input
             label="City"
             placeholder="San Francisco"
@@ -212,7 +212,7 @@ new #[Layout('layouts::guest')] class extends Component
             wire:model="zip_code"
             value="{{ old('zip_code') }}"
         />
-        <div class="flex flex-col gap-2 col-span-2">
+        <div class="flex flex-col gap-2 col-span-1 md:col-span-2">
             <flux:textarea
                 wire:model="complete_address"
                 label="Alamat Lengkap"
@@ -225,8 +225,8 @@ new #[Layout('layouts::guest')] class extends Component
 
     <flux:separator text="experiences"/>
 
-    <flux:fieldset class="grid grid-cols-2 gap-x-4 gap-y-6">
-        <div class="col-span-2">
+    <flux:fieldset class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 md:gap-y-6">
+        <div class="col-span-1 md:col-span-2">
             <flux:textarea
                 wire:model="experience"
                 label="Experiences"
@@ -250,7 +250,7 @@ new #[Layout('layouts::guest')] class extends Component
             wire:model="portofolio_file"
         />
 
-        <div class="col-span-2">
+        <div class="col-span-1 md:col-span-2">
             <flux:input
                 label="Web Portofolio URL"
                 placeholder="https://nugroho.porto.com"

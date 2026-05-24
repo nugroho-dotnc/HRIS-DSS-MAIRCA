@@ -19,12 +19,12 @@ new #[Layout('layouts::guest')] class extends Component
 
 <div>
     <div class="flex flex-1 flex-col gap-6 rounded-xl">
-        <div class="w-full flex flex-col gap-6">
+        <div class="w-full flex flex-col gap-4 md:gap-6">
             <livewire:bread-crumbs/>
             {{-- Header --}}
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div class="flex flex-col gap-1">
-                    <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $vacancy->title }}</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white">{{ $vacancy->title }}</h1>
                     <span class="text-sm text-zinc-400">{{ $vacancy->Position->position_name }}</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -38,7 +38,7 @@ new #[Layout('layouts::guest')] class extends Component
             <flux:separator/>
 
             {{-- Meta info --}}
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 <div class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Posisi</span>
                     <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -94,10 +94,10 @@ new #[Layout('layouts::guest')] class extends Component
 
             {{-- CTA bawah --}}
             @if($vacancy->status === 'open')
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <flux:text class="text-zinc-400 text-sm">Tertarik dengan posisi ini?</flux:text>
                     <flux:button
-                        variant="primary" class="cursor-pointer"
+                        variant="primary" class="cursor-pointer w-full sm:w-auto"
                         size="sm"
                         href="{{ route('candidate.vacancies.apply', $this->id) }}"
                         wire:navigate

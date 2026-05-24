@@ -30,15 +30,15 @@ new #[Layout('layouts::guest')] class extends Component
 ?>
 
 <div>
-    <section class="flex flex-col gap-6 items-center justify-start w-full max-w-2xl mx-auto py-10" id="vacancies">
+    <section class="flex flex-col gap-4 md:gap-6 items-center justify-start w-full max-w-2xl mx-auto py-6 md:py-10" id="vacancies">
         <div class="text-center flex flex-col gap-1.5">
-            <h1 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">Lacak Status Lamaran</h1>
-            <p class="text-zinc-500 dark:text-zinc-400 text-sm">
+            <h1 class="text-xl md:text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">Lacak Status Lamaran</h1>
+            <p class="text-zinc-500 dark:text-zinc-400 text-xs md:text-sm">
                 Masukkan nama lengkap atau kode aplikasi untuk melihat status rekrutmen terbaru.
             </p>
         </div>
 
-        <div class="w-full max-w-md">
+        <div class="w-full">
             <flux:input
                 wire:model.live.debounce.300ms="search"
                 type="text"
