@@ -1,9 +1,5 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
-  "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "composer install --no-dev --optimize-autoloader && npm install && npm run build && php artisan storage:link"
-  },
   "deploy": {
     "startCommand": "php artisan migrate --force && frankenphp run --config /etc/caddy/Caddyfile",
     "restartPolicyType": "ON_FAILURE"
