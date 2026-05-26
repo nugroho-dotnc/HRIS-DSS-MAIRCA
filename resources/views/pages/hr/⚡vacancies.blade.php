@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Vacancies;
+use Carbon\Carbon;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -8,16 +9,62 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-new  #[Layout('layouts::hr', ['page_title' => 'Vacancies'])] class extends Component
+new  #[Layout('layouts::hr', ['page_title' => 'Vacancies', 'page_description' => 'Kelola data lamaran'])] class extends Component
 {
     use WithPagination;
     //
     public $search = '';
+    public $filterStatus = '';
+    public $deadlineSort = 'asc';
 
     public function vacancies(){
-        return Vacancies::where('title', 'like',"%".$this->search."%")
-        ->with(['Hr', 'Position'])->orderBy('status', 'desc')
-        ->paginate(6);
+        $query = Vacancies::where('title', 'like',"%".$this->search."%")
+            ->with(['Hr', 'Position']);
+
+        if ($this->filterStatus) {
+            $query->where('status', $this->filterStatus);
+        }
+
+        return $query->orderBy('deadline', $this->deadlineSort)
+            ->paginate(6);
+    }
+
+    public function updatedSearch(){
+        $this->resetPage();
+    }
+
+    public function updatedFilterStatus(){
+        $this->resetPage();
+    }
+
+    public function toggleDeadlineSort(){
+        $this->deadlineSort = $this->deadlineSort === 'asc' ? 'desc' : 'asc';
+        $this->resetPage();
+    }
+
+    public function deadlineSortIcon(): string
+    {
+        return $this->deadlineSort === 'asc' ? 'arrow-up' : 'arrow-down';
+    }
+
+    public function statusColor($status): string
+    {
+        return match ($status) {
+            'open' => 'green',
+            'closed' => 'zinc',
+            default => 'zinc',
+        };
+    }
+
+    public function deadlineColor($deadline): string
+    {
+        $days = today()->diffInDays(Carbon::parse($deadline), false);
+
+        return match (true) {
+            $days > 14 => 'green',
+            $days > 7 => 'amber',
+            default => 'red',
+        };
     }
 
     public function delete($id){
@@ -37,14 +84,20 @@ new  #[Layout('layouts::hr', ['page_title' => 'Vacancies'])] class extends Compo
 <div>
     {{-- I have not failed. I've just found 10,000 ways that won't work. - Thomas Edison --}}
     <div class="flex flex-1 flex-col gap-8">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <flux:input wire:model.live.debounce.300ms="search" type="text" class="w-full max-w-md" kbd="⌘K" icon="magnifying-glass" placeholder="Search..."/>
-            <flux:modal.trigger name="add-positions">
-                <flux:button class="cursor-pointer" variant="primary" href="{{ route('hr.vacancies.create') }}" wire:navigate>Tambah</flux:button>
-            </flux:modal.trigger>
-        </div>
+            <div class="flex flex-col lg:flex-row gap-3">
+                <flux:select wire:model.live="filterStatus" placeholder="Semua Status" class="min-w-40">
+                    <flux:select.option value="">Semua Status</flux:select.option>
+                    <flux:select.option value="open">Open</flux:select.option>
+                    <flux:select.option value="closed">Closed</flux:select.option>
+                </flux:select>
 
-        <livewire:bread-crumbs/>
+                <flux:modal.trigger name="add-positions">
+                    <flux:button class="cursor-pointer" variant="primary" href="{{ route('hr.vacancies.create') }}" wire:navigate>Tambah</flux:button>
+                </flux:modal.trigger>
+            </div>
+        </div>
 
         @if (count($this->vacancies()) != 0)
             <flux:table :paginate="$this->vacancies()">
@@ -52,7 +105,12 @@ new  #[Layout('layouts::hr', ['page_title' => 'Vacancies'])] class extends Compo
                     <flux:table.column class="2/7">HR</flux:table.column>
                     <flux:table.column class="1/7">Position</flux:table.column>
                     <flux:table.column class="1/7">Title</flux:table.column>
-                    <flux:table.column class="1/7">Deadline</flux:table.column>
+                    <flux:table.column class="1/7">
+                        <button type="button" wire:click="toggleDeadlineSort" class="inline-flex cursor-pointer items-center gap-1 font-medium">
+                            Deadline
+                            <flux:icon :name="$this->deadlineSortIcon()" class="size-3.5" />
+                        </button>
+                    </flux:table.column>
                     <flux:table.column class="1/7">Status</flux:table.column>
                     <flux:table.column class="1/7">Action</flux:table.column>
                 </flux:table.columns>
@@ -62,8 +120,12 @@ new  #[Layout('layouts::hr', ['page_title' => 'Vacancies'])] class extends Compo
                             <flux:table.cell>{{$vac->Hr->name}}</flux:table.cell>
                             <flux:table.cell>{{$vac->Position->position_name}}</flux:table.cell>
                             <flux:table.cell>{{$vac->title}}</flux:table.cell>
-                            <flux:table.cell>{{$vac->deadline}}</flux:table.cell>
-                            <flux:table.cell><flux:badge color="green" size="sm" inset="top bottom">{{$vac->status}}</flux:badge></flux:table.cell>
+                            <flux:table.cell>
+                                <flux:badge color="{{ $this->deadlineColor($vac->deadline) }}" size="sm" inset="top bottom">
+                                    {{ Carbon::parse($vac->deadline)->translatedFormat('d M Y') }}
+                                </flux:badge>
+                            </flux:table.cell>
+                            <flux:table.cell><flux:badge color="{{ $this->statusColor($vac->status) }}" size="sm" inset="top bottom">{{$vac->status}}</flux:badge></flux:table.cell>
                             <flux:table.cell variant="strong" class="space-x-2">
                                 <flux:button icon="book-open" size="sm" class="cursor-pointer" href="{{ route('hr.vacancies.preview', $vac->id) }}" wire:navigate>preview</flux:button>
                                 <flux:button icon="trash" size="sm" class="cursor-pointer" wire:click="delete({{$vac->id}})" wire:confirm="yakin ingin menghapus lowongan ini?">delete</flux:button>
