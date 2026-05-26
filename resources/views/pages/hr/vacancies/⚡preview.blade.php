@@ -77,7 +77,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Preview'])] class extends Componen
 <div class="flex flex-1 flex-col gap-6 rounded-xl">
     <livewire:bread-crumbs/>
 
-    <div class="w-full max-w-4xl flex flex-col gap-6">
+    <div class="w-full flex flex-col gap-6">
 
         {{-- Header --}}
         <div class="flex items-start justify-between gap-4">
