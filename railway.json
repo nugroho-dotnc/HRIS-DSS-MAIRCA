@@ -1,0 +1,7 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "deploy": {
+    "startCommand": "php artisan storage:link --force && php artisan migrate --force && frankenphp run --config /etc/caddy/Caddyfile",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
