@@ -8,13 +8,36 @@ use App\Models\RecruitmentCriteria;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use OpenApi\Attributes as OA;
 
 class RecruitmentCriteriaController extends Controller
 {
-    /**
-     * GET /api/admin/criteria
-     * List semua kriteria MAIRCA, bisa filter per position_id.
-     */
+    #[OA\Get(
+        path: '/admin/criteria',
+        summary: 'Mendapatkan daftar kriteria MAIRCA',
+        description: 'Mengambil semua data kriteria beserta skala Likert-nya.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        parameters: [
+            new OA\Parameter(name: 'position_id', in: 'query', required: false, description: 'Filter berdasarkan ID posisi', schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Daftar kriteria berhasil diambil',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/RecruitmentCriteria')),
+                        new OA\Property(property: 'weight_check', type: 'object', additionalProperties: new OA\AdditionalProperties(type: 'number'))
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
     public function index(Request $request): JsonResponse
     {
         $query = RecruitmentCriteria::with(['position.department', 'likertScales']);
@@ -31,25 +54,59 @@ class RecruitmentCriteriaController extends Controller
         });
 
         return response()->json([
-            'success'      => true,
-            'data'         => $criteria,
+            'success' => true,
+            'data' => $criteria,
             'weight_check' => $grouped, // Tampilkan total bobot per posisi untuk validasi
         ]);
     }
 
-    /**
-     * POST /api/admin/criteria
-     * Tambah kriteria baru untuk suatu posisi.
-     */
+    #[OA\Post(
+        path: '/admin/criteria',
+        summary: 'Membuat kriteria MAIRCA baru',
+        description: 'Menambahkan kriteria baru untuk suatu posisi.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['position_id', 'name', 'weight', 'type', 'data_type'],
+                properties: [
+                    new OA\Property(property: 'position_id', type: 'integer', example: 1),
+                    new OA\Property(property: 'name', type: 'string', example: 'Kemampuan Komunikasi'),
+                    new OA\Property(property: 'weight', type: 'number', example: 25.0),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'type', type: 'string', enum: ['benefit', 'cost'], example: 'benefit'),
+                    new OA\Property(property: 'data_type', type: 'string', enum: ['kualitatif', 'kuantitatif'], example: 'kualitatif')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Kriteria berhasil dibuat',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Kriteria MAIRCA berhasil ditambahkan.'),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/RecruitmentCriteria')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Validasi gagal atau bobot melebihi 100%', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
     public function store(Request $request): JsonResponse
     {
         $request->validate([
             'position_id' => 'required|exists:positions,id',
-            'name'        => 'required|string|max:255',
-            'weight'      => 'required|numeric|min:0|max:100',
+            'name' => 'required|string|max:255',
+            'weight' => 'required|numeric|min:0|max:100',
             'description' => 'nullable|string',
-            'type'        => ['required', Rule::in(['benefit', 'cost'])],
-            'data_type'   => ['required', Rule::in(['kualitatif', 'kuantitatif'])],
+            'type' => ['required', Rule::in(['benefit', 'cost'])],
+            'data_type' => ['required', Rule::in(['kualitatif', 'kuantitatif'])],
         ]);
 
         // Validasi: total bobot per posisi tidak boleh melebihi 100%
@@ -58,51 +115,115 @@ class RecruitmentCriteriaController extends Controller
 
         if (($existingWeight + $request->weight) > 100) {
             return response()->json([
-                'success'           => false,
-                'message'           => 'Total bobot kriteria untuk posisi ini akan melebihi 100%. Sisa bobot yang tersedia: ' . (100 - $existingWeight) . '%.',
-                'existing_weight'   => $existingWeight,
-                'available_weight'  => 100 - $existingWeight,
+                'success' => false,
+                'message' => 'Total bobot kriteria untuk posisi ini akan melebihi 100%. Sisa bobot yang tersedia: ' . (100 - $existingWeight) . '%.',
+                'existing_weight' => $existingWeight,
+                'available_weight' => 100 - $existingWeight,
             ], 422);
         }
 
         $criteria = RecruitmentCriteria::create($request->only([
-            'position_id', 'name', 'weight', 'description', 'type', 'data_type',
+            'position_id',
+            'name',
+            'weight',
+            'description',
+            'type',
+            'data_type',
         ]));
 
         return response()->json([
             'success' => true,
             'message' => 'Kriteria MAIRCA berhasil ditambahkan.',
-            'data'    => $criteria->load(['position', 'likertScales']),
+            'data' => $criteria->load(['position', 'likertScales']),
         ], 201);
     }
 
-    /**
-     * GET /api/admin/criteria/{id}
-     */
+    #[OA\Get(
+        path: '/admin/criteria/{id}',
+        summary: 'Melihat detail kriteria',
+        description: 'Mengambil data detail kriteria berdasarkan ID.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'ID kriteria', schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Data kriteria berhasil diambil',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/RecruitmentCriteria')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'Kriteria tidak ditemukan'),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
     public function show(string $id): JsonResponse
     {
         $criteria = RecruitmentCriteria::with(['position.department', 'likertScales'])->findOrFail($id);
 
         return response()->json([
             'success' => true,
-            'data'    => $criteria,
+            'data' => $criteria,
         ]);
     }
 
-    /**
-     * PUT /api/admin/criteria/{id}
-     * Update kriteria + bobot. Validasi total bobot = 100%.
-     */
+    #[OA\Put(
+        path: '/admin/criteria/{id}',
+        summary: 'Update kriteria',
+        description: 'Memperbarui data kriteria berdasarkan ID.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'ID kriteria', schema: new OA\Schema(type: 'integer'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Kemampuan Komunikasi Update'),
+                    new OA\Property(property: 'weight', type: 'number', example: 30.0),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'type', type: 'string', enum: ['benefit', 'cost'], example: 'benefit'),
+                    new OA\Property(property: 'data_type', type: 'string', enum: ['kualitatif', 'kuantitatif'], example: 'kualitatif')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Kriteria berhasil diupdate',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Kriteria berhasil diupdate.'),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/RecruitmentCriteria')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'Kriteria tidak ditemukan'),
+            new OA\Response(response: 422, description: 'Validasi gagal', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
     public function update(Request $request, string $id): JsonResponse
     {
         $criteria = RecruitmentCriteria::findOrFail($id);
 
         $request->validate([
-            'name'        => 'sometimes|string|max:255',
-            'weight'      => 'sometimes|numeric|min:0|max:100',
+            'name' => 'sometimes|string|max:255',
+            'weight' => 'sometimes|numeric|min:0|max:100',
             'description' => 'nullable|string',
-            'type'        => ['sometimes', Rule::in(['benefit', 'cost'])],
-            'data_type'   => ['sometimes', Rule::in(['kualitatif', 'kuantitatif'])],
+            'type' => ['sometimes', Rule::in(['benefit', 'cost'])],
+            'data_type' => ['sometimes', Rule::in(['kualitatif', 'kuantitatif'])],
         ]);
 
         if ($request->has('weight')) {
@@ -113,8 +234,8 @@ class RecruitmentCriteriaController extends Controller
 
             if (($otherWeight + $request->weight) > 100) {
                 return response()->json([
-                    'success'          => false,
-                    'message'          => 'Total bobot kriteria akan melebihi 100%. Bobot dari kriteria lain: ' . $otherWeight . '%.',
+                    'success' => false,
+                    'message' => 'Total bobot kriteria akan melebihi 100%. Bobot dari kriteria lain: ' . $otherWeight . '%.',
                     'available_weight' => 100 - $otherWeight,
                 ], 422);
             }
@@ -126,13 +247,36 @@ class RecruitmentCriteriaController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Kriteria berhasil diupdate.',
-            'data'    => $criteria->load(['position', 'likertScales']),
+            'data' => $criteria->load(['position', 'likertScales']),
         ]);
     }
 
-    /**
-     * DELETE /api/admin/criteria/{id}
-     */
+    #[OA\Delete(
+        path: '/admin/criteria/{id}',
+        summary: 'Hapus kriteria',
+        description: 'Menghapus kriteria berdasarkan ID.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'ID kriteria', schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Kriteria berhasil dihapus',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Kriteria berhasil dihapus.')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'Kriteria tidak ditemukan'),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
     public function destroy(string $id): JsonResponse
     {
         $criteria = RecruitmentCriteria::findOrFail($id);
@@ -146,10 +290,33 @@ class RecruitmentCriteriaController extends Controller
 
     // ─── Likert Scale Management ───────────────────────────────────────────────
 
-    /**
-     * GET /api/admin/criteria/{id}/likert
-     * List skala Likert untuk kriteria ini.
-     */
+    #[OA\Get(
+        path: '/admin/criteria/{id}/likert',
+        summary: 'Mendapatkan skala Likert untuk kriteria',
+        description: 'Mengambil data skala Likert untuk kriteria tertentu.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'ID kriteria', schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Skala Likert berhasil diambil',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/LikertScale'))
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Kriteria bukan kualitatif', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Kriteria tidak ditemukan'),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
     public function likertIndex(string $id): JsonResponse
     {
         $criteria = RecruitmentCriteria::findOrFail($id);
@@ -163,14 +330,48 @@ class RecruitmentCriteriaController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $criteria->likertScales()->orderBy('value')->get(),
+            'data' => $criteria->likertScales()->orderBy('value')->get(),
         ]);
     }
 
-    /**
-     * POST /api/admin/criteria/{id}/likert
-     * Tambah opsi skala Likert ke kriteria kualitatif.
-     */
+    #[OA\Post(
+        path: '/admin/criteria/{id}/likert',
+        summary: 'Membuat opsi skala Likert baru',
+        description: 'Menambahkan opsi skala Likert untuk kriteria kualitatif.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'ID kriteria', schema: new OA\Schema(type: 'integer'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['label', 'value'],
+                properties: [
+                    new OA\Property(property: 'label', type: 'string', example: 'Sangat Baik'),
+                    new OA\Property(property: 'value', type: 'number', example: 5.0)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Skala Likert berhasil dibuat',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Skala Likert berhasil ditambahkan.'),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/LikertScale')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Validasi gagal atau Kriteria bukan kualitatif', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
+            new OA\Response(response: 404, description: 'Kriteria tidak ditemukan'),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
     public function likertStore(Request $request, string $id): JsonResponse
     {
         $criteria = RecruitmentCriteria::findOrFail($id);
@@ -189,21 +390,44 @@ class RecruitmentCriteriaController extends Controller
 
         $scale = LikertScale::create([
             'recruitment_criterias_id' => $id,
-            'label'                    => $request->label,
-            'value'                    => $request->value,
+            'label' => $request->label,
+            'value' => $request->value,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Skala Likert berhasil ditambahkan.',
-            'data'    => $scale,
+            'data' => $scale,
         ], 201);
     }
 
-    /**
-     * DELETE /api/admin/criteria/{id}/likert/{scaleId}
-     * Hapus opsi skala Likert.
-     */
+    #[OA\Delete(
+        path: '/admin/criteria/{id}/likert/{scaleId}',
+        summary: 'Hapus opsi skala Likert',
+        description: 'Menghapus opsi skala Likert berdasarkan ID.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'ID kriteria', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'scaleId', in: 'path', required: true, description: 'ID skala Likert', schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Skala Likert berhasil dihapus',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Skala Likert berhasil dihapus.')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'Kriteria atau Skala Likert tidak ditemukan'),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
     public function likertDestroy(string $id, string $scaleId): JsonResponse
     {
         $scale = LikertScale::where('recruitment_criterias_id', $id)
