@@ -63,21 +63,21 @@ new #[Layout('layouts::hr', ['page_title' => 'Review Lamaran', 'page_description
         Flux::toast('Lamaran berhasil dipindahkan ke screening.');
     }
 
-    public function reject($id)
-    {
-        $application = Application::findOrFail($id);
-        $allowed = ['applied', 'screening', 'interview_scheduled'];
+    // public function reject($id)
+    // {
+    //     $application = Application::findOrFail($id);
+    //     $allowed = ['applied', 'screening', 'interview_scheduled'];
 
-        if (!in_array($application->status, $allowed)) {
-            Flux::toast("Lamaran berstatus '{$application->status}' tidak dapat ditolak pada tahap ini.", variant: 'danger');
-            return;
-        }
+    //     if (!in_array($application->status, $allowed)) {
+    //         Flux::toast("Lamaran berstatus '{$application->status}' tidak dapat ditolak pada tahap ini.", variant: 'danger');
+    //         return;
+    //     }
 
-        $application->status = 'rejected';
-        $application->save();
+    //     $application->status = 'rejected';
+    //     $application->save();
 
-        Flux::toast('Lamaran berhasil ditolak.');
-    }
+    //     Flux::toast('Lamaran berhasil ditolak.');
+    // }
 
     public function statusColor($status)
     {
@@ -169,7 +169,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Review Lamaran', 'page_description
                             <flux:table.cell variant="strong" class="space-x-2">
                                 <flux:button icon="eye" size="sm" class="cursor-pointer" href="{{ route('hr.applications.show', $app->id) }}" wire:navigate>Detail</flux:button>
 
-                                @if($app->status === 'applied' || in_array($app->status, ['screening', 'interview_scheduled']))
+                                {{-- @if($app->status === 'applied' || in_array($app->status, ['screening', 'interview_scheduled']))
                                     <flux:dropdown position="bottom" align="end">
                                         <flux:button icon="ellipsis-horizontal" size="sm" variant="ghost" class="cursor-pointer" />
 
@@ -186,7 +186,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Review Lamaran', 'page_description
                                             @endif
                                         </flux:menu>
                                     </flux:dropdown>
-                                @endif
+                                @endif --}}
                             </flux:table.cell>
                         </flux:table.row>
                     @endforeach

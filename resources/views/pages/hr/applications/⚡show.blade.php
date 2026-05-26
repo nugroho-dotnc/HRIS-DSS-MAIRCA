@@ -1,13 +1,29 @@
 <?php
 
 use App\Models\Application;
+use App\Models\InterviewSession;
 use Flux\Flux;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends Component
 {
     public $id;
+
+    // Form penjadwalan interview
+    public string $interviewDate = '';
+    public string $interviewNotes = '';
+
+    public function mount()
+    {
+        $application = Application::findOrFail($this->id);
+
+        if ($application->status === 'applied') {
+            $application->status = 'screening';
+            $application->save();
+        }
+    }
 
     public function application()
     {
@@ -34,21 +50,58 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
         Flux::toast('Lamaran berhasil dipindahkan ke screening.');
     }
 
-    public function reject()
+    public function scheduleInterview(): void
     {
+        $this->validate([
+            'interviewDate'  => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    $selectedDate = \Carbon\Carbon::parse($value, 'Asia/Jakarta');
+                    if ($selectedDate->isBefore(now('Asia/Jakarta'))) {
+                        $fail('Jadwal interview tidak boleh di tanggal atau jam yang sudah lewat.');
+                    }
+                }
+            ],
+            'interviewNotes' => 'nullable|string|max:1000',
+        ], [
+            'interviewDate.required' => 'Tanggal & waktu interview wajib diisi.',
+            'interviewDate.date'     => 'Format tanggal & waktu tidak valid.',
+            'interviewNotes.max'     => 'Catatan tidak boleh lebih dari 1000 karakter.',
+        ]);
+
         $application = Application::findOrFail($this->id);
-        $allowed = ['applied', 'screening', 'interview_scheduled'];
 
-        if (!in_array($application->status, $allowed)) {
-            Flux::toast("Lamaran berstatus '{$application->status}' tidak dapat ditolak pada tahap ini.", variant: 'danger');
-            return;
-        }
+        InterviewSession::create([
+            'application_id' => $this->id,
+            'interviewer_id' => auth()->id(),
+            'interview_date' => $this->interviewDate,
+            'notes'          => $this->interviewNotes ?? '',
+        ]);
 
-        $application->status = 'rejected';
+        $application->status = 'interview_scheduled';
         $application->save();
 
-        Flux::toast('Lamaran berhasil ditolak.');
+        $this->reset('interviewDate', 'interviewNotes');
+        Flux::modal('schedule-interview')->close();
+        Flux::toast('Interview berhasil dijadwalkan!');
     }
+
+    // public function reject()
+    // {
+    //     $application = Application::findOrFail($this->id);
+    //     $allowed = ['applied', 'screening', 'interview_scheduled'];
+
+    //     if (!in_array($application->status, $allowed)) {
+    //         Flux::toast("Lamaran berstatus '{$application->status}' tidak dapat ditolak pada tahap ini.", variant: 'danger');
+    //         return;
+    //     }
+
+    //     $application->status = 'rejected';
+    //     $application->save();
+
+    //     Flux::toast('Lamaran berhasil ditolak.');
+    // }
 
     public function statusColor($status)
     {
@@ -90,21 +143,54 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
             <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Kode Lamaran: <span class="font-mono">{{ $app->application_code }}</span></p>
         </div>
         <div class="flex gap-2">
-            @if($app->status === 'applied')
-                <flux:button icon="arrow-right-circle" variant="primary" class="cursor-pointer" wire:click="moveToScreening" wire:confirm="Pindahkan lamaran ini ke tahap screening?">
-                    Screening
-                </flux:button>
-            @endif
-            @if(in_array($app->status, ['applied', 'screening', 'interview_scheduled']))
-                <flux:button icon="x-circle" variant="danger" class="cursor-pointer" wire:click="reject" wire:confirm="Yakin ingin menolak lamaran ini?">
-                    Tolak
-                </flux:button>
+            @if($app->status === 'screening')
+                <flux:modal.trigger name="schedule-interview">
+                    <flux:button icon="calendar-days" variant="primary" class="cursor-pointer">
+                        Jadwalkan Interview
+                    </flux:button>
+                </flux:modal.trigger>
             @endif
             <flux:button icon="arrow-left" href="{{ route('hr.applications') }}" wire:navigate class="cursor-pointer">
                 Kembali
             </flux:button>
         </div>
     </div>
+
+    {{-- Modal: Jadwalkan Interview --}}
+    <flux:modal name="schedule-interview" class="md:w-lg">
+        <div class="flex flex-col gap-6">
+            <div>
+                <flux:heading size="lg">Jadwalkan Interview</flux:heading>
+                <flux:subheading>Isi informasi jadwal sesi interview untuk kandidat ini.</flux:subheading>
+            </div>
+
+            <flux:field>
+                <flux:label>Tanggal & Waktu Interview</flux:label>
+                <flux:input wire:model="interviewDate" type="datetime-local" />
+                <flux:error name="interviewDate" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>Catatan <span class="ml-1.5"><flux:badge size="sm">Opsional</flux:badge></span></flux:label>
+                <flux:textarea wire:model="interviewNotes" placeholder="Tambahkan catatan untuk sesi interview ini..." rows="3" />
+                <flux:error name="interviewNotes" />
+            </flux:field>
+
+            <div class="flex justify-end gap-2">
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    variant="primary"
+                    icon="calendar-days"
+                    class="cursor-pointer"
+                    wire:click="scheduleInterview"
+                >
+                    Simpan Jadwal
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 
     <flux:separator/>
 

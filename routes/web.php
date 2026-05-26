@@ -25,6 +25,8 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
     Route::livewire('/hr/vacancies/{id}', 'pages::hr.vacancies.preview')->name('hr.vacancies.preview');
     Route::livewire('/hr/applications', 'pages::hr.applications')->name('hr.applications');
     Route::livewire('/hr/applications/{id}', 'pages::hr.applications.show')->name('hr.applications.show');
+    Route::livewire('/hr/interviews', 'pages::hr.interviews')->name('hr.interviews');
+    Route::livewire('/hr/interviews/{sessionId}/dss', 'pages::hr.interviews.dss')->name('hr.interviews.dss');
 });
 
 // ─── Employee Routes ──────────────────────────────────────────────────────────
