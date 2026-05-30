@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Candidate\ApplicationController as CandidateApplicationController;
 use App\Http\Controllers\Api\Candidate\VacancyController as CandidateVacancyController;
+use App\Http\Controllers\Api\Public\DepartmentController as PublicDepartmentController;
+use App\Http\Controllers\Api\Public\PositionController as PublicPositionController;
 use App\Http\Controllers\Api\Employee\ProfileController;
 use App\Http\Controllers\Api\HR\ApplicationController as HRApplicationController;
 use App\Http\Controllers\Api\HR\DecisionController;
@@ -52,6 +54,17 @@ Route::prefix('auth')->group(function () {
 Route::prefix('vacancies')->group(function () {
     Route::get('/', [CandidateVacancyController::class, 'index'])->name('api.vacancies.index');
     Route::get('/{id}', [CandidateVacancyController::class, 'show'])->name('api.vacancies.show');
+});
+
+// Public Departments & Positions (tanpa autentikasi)
+Route::prefix('departments')->group(function () {
+    Route::get('/', [PublicDepartmentController::class, 'index'])->name('api.departments.index');
+    Route::get('/{id}', [PublicDepartmentController::class, 'show'])->name('api.departments.show');
+});
+
+Route::prefix('positions')->group(function () {
+    Route::get('/', [PublicPositionController::class, 'index'])->name('api.positions.index');
+    Route::get('/{id}', [PublicPositionController::class, 'show'])->name('api.positions.show');
 });
 
 // Apply & Track — PUBLIC (sesuai SRS: candidate tidak wajib login untuk apply)
