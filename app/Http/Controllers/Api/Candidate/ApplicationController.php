@@ -15,6 +15,133 @@ use OpenApi\Attributes as OA;
 class ApplicationController extends Controller
 {
     #[OA\Post(
+        path: '/applications/generate-code',
+        summary: 'Generate Application Code',
+        description: 'Membuat Application Code unik berdasarkan email kandidat dan ID lowongan yang dituju. Endpoint ini bersifat publik dan merupakan langkah pertama sebelum kandidat mengirim lamaran lengkap via POST /apply. Jika kandidat dengan email tersebut sudah pernah apply ke lowongan yang sama, mengembalikan kode yang sudah ada.',
+        tags: ['Public - Candidate'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['email', 'vacancy_id'],
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'budi@example.com', description: 'Email kandidat'),
+                    new OA\Property(property: 'vacancy_id', type: 'integer', example: 1, description: 'ID lowongan yang dituju'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Application Code berhasil dibuat',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Application Code berhasil dibuat.'),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'object',
+                            properties: [
+                                new OA\Property(property: 'application_code', type: 'string', example: 'APP-2026-ABCXYZ'),
+                                new OA\Property(property: 'vacancy_id', type: 'integer', example: 1),
+                                new OA\Property(property: 'vacancy_title', type: 'string', example: 'Senior Software Engineer'),
+                                new OA\Property(property: 'candidate_email', type: 'string', example: 'budi@example.com'),
+                                new OA\Property(property: 'status', type: 'string', example: 'applied'),
+                                new OA\Property(property: 'note', type: 'string', example: 'Simpan Application Code ini. Gunakan untuk melengkapi lamaran via POST /api/apply atau melacak status via GET /api/track/{code}.'),
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 200,
+                description: 'Application Code sudah ada (kandidat sudah pernah apply ke lowongan ini)',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Anda sudah memiliki Application Code untuk lowongan ini.'),
+                        new OA\Property(property: 'data', type: 'object')
+                    ]
+                )
+            ),
+            new OA\Response(response: 422, description: 'Validasi gagal atau lowongan tidak tersedia', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
+    public function generateCode(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email'      => 'required|email|max:255',
+            'vacancy_id' => 'required|integer|exists:vacancies,id',
+        ]);
+
+        // Cek vacancy masih open & belum melewati deadline
+        $vacancy = Vacancies::where('id', $request->vacancy_id)
+            ->where('status', 'open')
+            ->where('deadline', '>=', now()->toDateString())
+            ->first();
+
+        if (!$vacancy) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lowongan tidak tersedia atau sudah melewati deadline.',
+            ], 422);
+        }
+
+        // Cari atau buat record candidate berdasarkan email (data minimal)
+        $candidate = Candidate::firstOrCreate(
+            ['email' => $request->email],
+            ['name' => $request->email] // placeholder; diperbarui saat POST /apply
+        );
+
+        // Cek apakah sudah ada application untuk candidate + vacancy ini
+        $existing = Application::where('candidate_id', $candidate->id)
+            ->where('vacancy_id', $request->vacancy_id)
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Anda sudah memiliki Application Code untuk lowongan ini.',
+                'data'    => [
+                    'application_code' => $existing->application_code,
+                    'vacancy_id'       => $vacancy->id,
+                    'vacancy_title'    => $vacancy->title,
+                    'candidate_email'  => $request->email,
+                    'status'           => $existing->status,
+                    'note'             => 'Gunakan kode ini untuk melengkapi lamaran via POST /api/apply atau melacak status via GET /api/track/{code}.',
+                ],
+            ], 200);
+        }
+
+        // Generate kode unik
+        do {
+            $code = 'APP-' . now()->year . '-' . strtoupper(Str::random(6));
+        } while (Application::where('application_code', $code)->exists());
+
+        // Buat record application dengan status 'applied'
+        Application::create([
+            'candidate_id'     => $candidate->id,
+            'vacancy_id'       => $request->vacancy_id,
+            'status'           => 'applied',
+            'application_code' => $code,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Application Code berhasil dibuat.',
+            'data'    => [
+                'application_code' => $code,
+                'vacancy_id'       => $vacancy->id,
+                'vacancy_title'    => $vacancy->title,
+                'candidate_email'  => $request->email,
+                'status'           => 'applied',
+                'note'             => 'Simpan Application Code ini. Gunakan untuk melengkapi lamaran via POST /api/apply atau melacak status via GET /api/track/{code}.',
+            ],
+        ], 201);
+    }
+
+
+    #[OA\Post(
         path: '/apply',
         summary: 'Apply ke lowongan pekerjaan',
         description: 'Kandidat mengisi data diri sekaligus apply ke vacancy tanpa perlu login. Sistem membuat record candidate (jika belum ada), application, dan menerbitkan Application Code.',

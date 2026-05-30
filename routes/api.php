@@ -68,6 +68,7 @@ Route::prefix('positions')->group(function () {
 });
 
 // Apply & Track — PUBLIC (sesuai SRS: candidate tidak wajib login untuk apply)
+Route::post('/applications/generate-code', [CandidateApplicationController::class, 'generateCode'])->name('api.candidate.generate-code');
 Route::post('/apply', [CandidateApplicationController::class, 'apply'])->name('api.candidate.apply');
 Route::get('/track/{applicationCode}', [CandidateApplicationController::class, 'track'])->name('api.candidate.track');
 
