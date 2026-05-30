@@ -158,5 +158,24 @@ use OpenApi\Attributes as OA;
 )]
 abstract class Controller
 {
-    //
+    /**
+     * Standarisasi API response.
+     *
+     * @param  bool   $success
+     * @param  string $message
+     * @param  mixed  $data     null = not found / no payload, array/object = payload
+     * @param  int    $status   HTTP status code
+     */
+    protected function apiResponse(
+        bool $success,
+        string $message,
+        mixed $data = null,
+        int $status = 200
+    ): \Illuminate\Http\JsonResponse {
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'data'    => $data,
+        ], $status);
+    }
 }

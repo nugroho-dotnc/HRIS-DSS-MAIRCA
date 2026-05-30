@@ -76,6 +76,7 @@ class EmployeeController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar karyawan berhasil diambil.',
             'data' => $employees,
         ]);
     }
@@ -118,6 +119,7 @@ class EmployeeController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail karyawan berhasil diambil.',
             'data' => $employee,
         ]);
     }

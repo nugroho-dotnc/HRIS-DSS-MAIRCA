@@ -51,6 +51,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Profil berhasil diambil.',
             'data' => [
                 'user' => $user->only(['id', 'name', 'email', 'role', 'status']),
                 'employment' => $employee,
@@ -163,6 +164,7 @@ class ProfileController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Data kepegawaian belum tersedia.',
+                'data' => null,
             ], 404);
         }
 

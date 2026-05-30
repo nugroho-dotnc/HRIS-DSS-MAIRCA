@@ -101,6 +101,7 @@ class ReportController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Laporan rekrutmen berhasil diambil.',
             'data' => [
                 'summary' => $summary,
                 'by_department' => $byDepartment,

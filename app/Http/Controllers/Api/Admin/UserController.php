@@ -71,6 +71,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar user berhasil diambil.',
             'data' => $users,
         ]);
     }
@@ -169,6 +170,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail user berhasil diambil.',
             'data' => $user,
         ]);
     }
@@ -386,6 +388,7 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Tidak bisa menghapus akun sendiri.',
+                'data' => null,
             ], 422);
         }
 
@@ -394,6 +397,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User berhasil dihapus.',
+            'data' => null,
         ]);
     }
 }

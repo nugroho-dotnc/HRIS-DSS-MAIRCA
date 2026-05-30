@@ -71,6 +71,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Akun Anda tidak aktif. Hubungi administrator.',
+                'data' => null,
             ], 403);
         }
 
@@ -198,6 +199,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Logout berhasil.',
+            'data' => null,
         ]);
     }
 
@@ -256,6 +258,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Data profil berhasil diambil.',
             'data' => $data,
         ]);
     }

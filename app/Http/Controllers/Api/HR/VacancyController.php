@@ -68,6 +68,7 @@ class VacancyController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar lowongan berhasil diambil.',
             'data' => $vacancies,
         ]);
     }
@@ -173,6 +174,7 @@ class VacancyController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail lowongan berhasil diambil.',
             'data' => $vacancy,
         ]);
     }
@@ -225,6 +227,7 @@ class VacancyController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Lowongan yang sudah ditutup tidak dapat diubah.',
+                'data' => null,
             ], 422);
         }
 
@@ -282,6 +285,7 @@ class VacancyController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Lowongan sudah dalam status closed.',
+                'data' => null,
             ], 422);
         }
 
@@ -330,6 +334,7 @@ class VacancyController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Lowongan tidak dapat dihapus karena sudah memiliki lamaran masuk.',
+                'data' => null,
             ], 422);
         }
 
@@ -338,6 +343,7 @@ class VacancyController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Lowongan berhasil dihapus.',
+            'data' => null,
         ]);
     }
 }

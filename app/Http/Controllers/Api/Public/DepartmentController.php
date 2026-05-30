@@ -57,6 +57,7 @@ class DepartmentController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar departemen berhasil diambil.',
             'data'    => $departments,
         ]);
     }
@@ -98,6 +99,7 @@ class DepartmentController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail departemen berhasil diambil.',
             'data'    => $department,
         ]);
     }

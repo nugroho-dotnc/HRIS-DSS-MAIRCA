@@ -73,6 +73,7 @@ class ApplicationController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar lamaran berhasil diambil.',
             'data' => $applications,
         ]);
     }
@@ -116,6 +117,7 @@ class ApplicationController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail lamaran berhasil diambil.',
             'data' => $application,
         ]);
     }
@@ -156,6 +158,7 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => "Hanya lamaran berstatus 'applied' yang dapat dipindahkan ke screening. Status saat ini: {$application->status}.",
+                'data' => null,
             ], 422);
         }
 
@@ -207,6 +210,7 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => "Lamaran berstatus '{$application->status}' tidak dapat ditolak pada tahap ini.",
+                'data' => null,
             ], 422);
         }
 

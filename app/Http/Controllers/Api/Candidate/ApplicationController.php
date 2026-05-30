@@ -84,6 +84,7 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Lowongan tidak tersedia atau sudah melewati deadline.',
+                'data'    => null,
             ], 422);
         }
 
@@ -225,6 +226,7 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Lowongan tidak tersedia atau sudah melewati deadline.',
+                'data'    => null,
             ], 422);
         }
 
@@ -271,6 +273,7 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Anda sudah pernah melamar ke lowongan ini.',
+                'data'    => null,
             ], 422);
         }
 
@@ -347,6 +350,7 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Application Code tidak ditemukan. Pastikan kode yang Anda masukkan benar.',
+                'data'    => null,
             ], 404);
         }
 
@@ -361,6 +365,7 @@ class ApplicationController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail lamaran berhasil diambil.',
             'data' => [
                 'application_code' => $applicationCode,
                 'status' => $application->status,
@@ -415,6 +420,7 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Anda belum memiliki profil kandidat. Silakan apply ke lowongan terlebih dahulu.',
+                'data'    => null,
             ], 404);
         }
 
@@ -433,6 +439,7 @@ class ApplicationController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar lamaran berhasil diambil.',
             'data' => [
                 'candidate_name' => $candidate->name,
                 'total' => $applications->count(),

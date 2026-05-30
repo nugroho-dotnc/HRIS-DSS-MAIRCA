@@ -64,6 +64,7 @@ class VacancyController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar lowongan berhasil diambil.',
             'data' => $vacancies,
         ]);
     }
@@ -113,6 +114,7 @@ class VacancyController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail lowongan berhasil diambil.',
             'data' => [
                 'id' => $vacancy->id,
                 'title' => $vacancy->title,

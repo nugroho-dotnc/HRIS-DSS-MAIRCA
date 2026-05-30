@@ -57,6 +57,7 @@ class DepartmentController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar departemen berhasil diambil.',
             'data' => $departments,
         ]);
     }
@@ -152,6 +153,7 @@ class DepartmentController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail departemen berhasil diambil.',
             'data' => $department,
         ]);
     }
@@ -259,6 +261,7 @@ class DepartmentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Departemen tidak dapat dihapus karena masih memiliki posisi terkait.',
+                'data' => null,
             ], 422);
         }
 
@@ -267,6 +270,7 @@ class DepartmentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Departemen berhasil dihapus.',
+            'data' => null,
         ]);
     }
 }

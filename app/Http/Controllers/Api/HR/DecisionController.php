@@ -71,6 +71,7 @@ class DecisionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => "Keputusan hanya bisa dibuat untuk lamaran berstatus 'interview_done'. Status saat ini: {$application->status}.",
+                'data' => null,
             ], 422);
         }
 
@@ -78,6 +79,7 @@ class DecisionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Hasil kalkulasi MAIRCA belum ada untuk lamaran ini. Jalankan kalkulasi MAIRCA terlebih dahulu.',
+                'data' => null,
             ], 422);
         }
 
@@ -169,6 +171,7 @@ class DecisionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => "Onboarding hanya untuk kandidat dengan status 'hired'. Status saat ini: {$application->status}.",
+                'data' => null,
             ], 422);
         }
 
@@ -208,7 +211,7 @@ class DecisionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Data employee untuk user ini sudah ada.',
-                'employee' => $existingEmployee->load(['user', 'department', 'position', 'supervisor.user']),
+                'data' => $existingEmployee->load(['user', 'department', 'position', 'supervisor.user']),
             ], 422);
         }
 

@@ -62,6 +62,7 @@ class PositionController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar posisi berhasil diambil.',
             'data' => $positions,
         ]);
     }
@@ -166,6 +167,7 @@ class PositionController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail posisi berhasil diambil.',
             'data' => $position,
         ]);
     }
@@ -263,6 +265,7 @@ class PositionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Posisi tidak dapat dihapus karena masih ada lowongan aktif.',
+                'data' => null,
             ], 422);
         }
 
@@ -271,6 +274,7 @@ class PositionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Posisi berhasil dihapus.',
+            'data' => null,
         ]);
     }
 }

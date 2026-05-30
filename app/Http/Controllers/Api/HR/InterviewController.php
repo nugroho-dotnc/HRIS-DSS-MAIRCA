@@ -69,6 +69,7 @@ class InterviewController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar sesi interview berhasil diambil.',
             'data' => $sessions,
         ]);
     }
@@ -124,6 +125,7 @@ class InterviewController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => "Hanya lamaran berstatus 'screening' yang dapat dijadwalkan interview. Status saat ini: {$application->status}.",
+                'data' => null,
             ], 422);
         }
 
@@ -192,6 +194,7 @@ class InterviewController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail sesi interview berhasil diambil.',
             'data' => $session,
         ]);
     }
@@ -304,6 +307,7 @@ class InterviewController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Skor interview berhasil diambil.',
             'data' => [
                 'session' => $session,
                 'total_criteria' => $filled,
@@ -398,6 +402,7 @@ class InterviewController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => "Kriteria ID {$scoreData['criteria_id']} tidak valid untuk posisi ini.",
+                    'data' => null,
                 ], 422);
             }
 
@@ -428,6 +433,7 @@ class InterviewController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Skor berhasil disimpan.',
+            'data' => null,
             'scores_saved' => count($saved),
             'total_criteria' => $totalCriteria,
             'inputted_scores' => $inputtedScores,

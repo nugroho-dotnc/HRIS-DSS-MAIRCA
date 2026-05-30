@@ -55,8 +55,11 @@ class RecruitmentCriteriaController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $criteria,
-            'weight_check' => $grouped, // Tampilkan total bobot per posisi untuk validasi
+            'message' => 'Daftar kriteria berhasil diambil.',
+            'data' => [
+                'criteria' => $criteria,
+                'weight_check' => $grouped, // Tampilkan total bobot per posisi untuk validasi
+            ],
         ]);
     }
 
@@ -119,6 +122,7 @@ class RecruitmentCriteriaController extends Controller
                 'message' => 'Total bobot kriteria untuk posisi ini akan melebihi 100%. Sisa bobot yang tersedia: ' . (100 - $existingWeight) . '%.',
                 'existing_weight' => $existingWeight,
                 'available_weight' => 100 - $existingWeight,
+                'data' => null,
             ], 422);
         }
 
@@ -170,6 +174,7 @@ class RecruitmentCriteriaController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Detail kriteria berhasil diambil.',
             'data' => $criteria,
         ]);
     }
@@ -237,6 +242,7 @@ class RecruitmentCriteriaController extends Controller
                     'success' => false,
                     'message' => 'Total bobot kriteria akan melebihi 100%. Bobot dari kriteria lain: ' . $otherWeight . '%.',
                     'available_weight' => 100 - $otherWeight,
+                    'data' => null,
                 ], 422);
             }
         }
@@ -285,6 +291,7 @@ class RecruitmentCriteriaController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Kriteria berhasil dihapus.',
+            'data' => null,
         ]);
     }
 
@@ -325,11 +332,13 @@ class RecruitmentCriteriaController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Kriteria ini bertipe kuantitatif, tidak memiliki skala Likert.',
+                'data' => null,
             ], 422);
         }
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar skala Likert berhasil diambil.',
             'data' => $criteria->likertScales()->orderBy('value')->get(),
         ]);
     }
@@ -380,6 +389,7 @@ class RecruitmentCriteriaController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Hanya kriteria kualitatif yang dapat memiliki skala Likert.',
+                'data' => null,
             ], 422);
         }
 
@@ -439,6 +449,7 @@ class RecruitmentCriteriaController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Skala Likert berhasil dihapus.',
+            'data' => null,
         ]);
     }
 }

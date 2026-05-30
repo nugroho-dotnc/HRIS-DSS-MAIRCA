@@ -58,12 +58,13 @@ class MAIRCAController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
+                'data' => null,
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat kalkulasi MAIRCA.',
-                'error' => $e->getMessage(),
+                'data' => ['error' => $e->getMessage()],
             ], 500);
         }
     }
@@ -119,6 +120,7 @@ class MAIRCAController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Belum ada hasil kalkulasi MAIRCA untuk vacancy ini. Jalankan kalkulasi terlebih dahulu.',
+                'data' => null,
             ], 404);
         }
 
@@ -148,6 +150,7 @@ class MAIRCAController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => 'Ranking MAIRCA berhasil diambil.',
             'data' => [
                 'vacancy' => [
                     'id' => $vacancy->id,
