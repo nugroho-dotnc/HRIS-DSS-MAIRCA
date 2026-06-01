@@ -14,13 +14,12 @@ class PositionController extends Controller
     #[OA\Get(
         path: '/admin/positions',
         summary: 'Mendapatkan daftar posisi',
-        description: 'Mengambil semua data posisi beserta departemennya.',
+        description: 'Mengambil semua data posisi beserta departemennya tanpa pagination, dan menyertakan total kriteria serta bobotnya.',
         security: [['sanctum' => []]],
         tags: ['Admin - Positions'],
         parameters: [
             new OA\Parameter(name: 'department_id', in: 'query', required: false, description: 'Filter berdasarkan ID departemen', schema: new OA\Schema(type: 'integer')),
-            new OA\Parameter(name: 'is_active', in: 'query', required: false, description: 'Filter berdasarkan status aktif (true/false)', schema: new OA\Schema(type: 'boolean')),
-            new OA\Parameter(name: 'per_page', in: 'query', required: false, description: 'Jumlah data per halaman', schema: new OA\Schema(type: 'integer', default: 20))
+            new OA\Parameter(name: 'is_active', in: 'query', required: false, description: 'Filter berdasarkan status aktif (true/false)', schema: new OA\Schema(type: 'boolean'))
         ],
         responses: [
             new OA\Response(
@@ -29,14 +28,21 @@ class PositionController extends Controller
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Daftar posisi berhasil diambil.'),
                         new OA\Property(
                             property: 'data',
-                            type: 'object',
-                            properties: [
-                                new OA\Property(property: 'current_page', type: 'integer', example: 1),
-                                new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/Position')),
-                                new OA\Property(property: 'total', type: 'integer', example: 50)
-                            ]
+                            type: 'array',
+                            items: new OA\Items(
+                                allOf: [
+                                    new OA\Schema(ref: '#/components/schemas/Position'),
+                                    new OA\Schema(
+                                        properties: [
+                                            new OA\Property(property: 'total_criteria', type: 'integer', example: 5),
+                                            new OA\Property(property: 'total_weight', type: 'number', format: 'float', example: 100)
+                                        ]
+                                    )
+                                ]
+                            )
                         )
                     ]
                 )
@@ -48,7 +54,9 @@ class PositionController extends Controller
     )]
     public function index(Request $request): JsonResponse
     {
-        $query = Position::with('department');
+        $query = Position::with('department')
+            ->withCount('recruitment_criteria')
+            ->withSum('recruitment_criteria', 'weight');
 
         if ($request->has('department_id')) {
             $query->where('department_id', $request->department_id);
@@ -58,10 +66,17 @@ class PositionController extends Controller
             $query->where('is_active', filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN));
         }
 
-        $positions = $query->orderBy('position_name')->paginate($request->get('per_page', 20));
+        $positions = $query->orderBy('position_name')->get()->map(function ($position) {
+            $data = $position->toArray();
+            $data['total_criteria'] = $position->recruitment_criteria_count;
+            $data['total_weight'] = (float) ($position->recruitment_criteria_sum_weight ?? 0);
+            unset($data['recruitment_criteria_count'], $data['recruitment_criteria_sum_weight']);
+            return $data;
+        });
 
         return response()->json([
             'success' => true,
+            'message' => 'Daftar posisi berhasil diambil.',
             'data' => $positions,
         ]);
     }
