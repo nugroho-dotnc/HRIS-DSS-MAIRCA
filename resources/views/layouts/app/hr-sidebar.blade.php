@@ -27,6 +27,9 @@
                     <flux:sidebar.item icon="calendar-days" :href="route('hr.interviews')" :current="request()->routeIs('hr.interviews', 'hr.interviews.dss')" wire:navigate>
                         {{ __('Interview') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="chart-bar" :href="route('hr.dss')" :current="request()->routeIs('hr.dss', 'hr.dss.result')" wire:navigate>
+                        {{ __('Hasil DSS') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
                 <flux:sidebar.group :heading="__('Account')" class="grid">
                     <flux:sidebar.item icon="cog-6-tooth" :href="route('profile.edit')" :current="request()->routeIs('profile.edit', 'security.edit', 'appearance.edit')" wire:navigate>
