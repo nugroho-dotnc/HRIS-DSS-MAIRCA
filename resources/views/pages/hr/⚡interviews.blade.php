@@ -4,7 +4,7 @@ use App\Models\InterviewSession;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-new #[Layout('layouts::hr', ['page_title' => 'Interview', 'page_description' => 'Jadwal sesi interview kandidat'])] class extends Component
+new #[Layout('layouts::hr', ['page_title' => '', 'page_description' => ''])] class extends Component
 {
     // 'today' | 'past' | 'all'
     public string $filterDate = 'all';

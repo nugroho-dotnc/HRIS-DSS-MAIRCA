@@ -87,21 +87,22 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
         Flux::toast('Interview berhasil dijadwalkan!');
     }
 
-    // public function reject()
-    // {
-    //     $application = Application::findOrFail($this->id);
-    //     $allowed = ['applied', 'screening', 'interview_scheduled'];
+    public function reject()
+    {
+        $application = Application::findOrFail($this->id);
+        $allowed = ['applied', 'screening', 'interview_scheduled'];
 
-    //     if (!in_array($application->status, $allowed)) {
-    //         Flux::toast("Lamaran berstatus '{$application->status}' tidak dapat ditolak pada tahap ini.", variant: 'danger');
-    //         return;
-    //     }
+        if (!in_array($application->status, $allowed)) {
+            Flux::toast("Lamaran berstatus '{$application->status}' tidak dapat ditolak pada tahap ini.", variant: 'danger');
+            return;
+        }
 
-    //     $application->status = 'rejected';
-    //     $application->save();
+        $application->status = 'rejected';
+        $application->save();
 
-    //     Flux::toast('Lamaran berhasil ditolak.');
-    // }
+        Flux::modal('reject')->close();
+        Flux::toast('Lamaran berhasil ditolak.');
+    }
 
     public function statusColor($status)
     {
@@ -144,6 +145,11 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
         </div>
         <div class="flex gap-2">
             @if($app->status === 'screening')
+                <flux:modal.trigger name="reject">
+                    <flux:button icon="x-mark" variant="danger" class="cursor-pointer">
+                        Tolak
+                    </flux:button>
+                </flux:modal.trigger>
                 <flux:modal.trigger name="schedule-interview">
                     <flux:button icon="calendar-days" variant="primary" class="cursor-pointer">
                         Jadwalkan Interview
@@ -187,6 +193,29 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
                     wire:click="scheduleInterview"
                 >
                     Simpan Jadwal
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
+    {{-- Modal: Konfirmasi Tolak Lamaran --}}
+    <flux:modal name="reject" class="md:w-md">
+        <div class="flex flex-col gap-6">
+            <div>
+                <flux:heading size="lg">Tolak Lamaran</flux:heading>
+                <flux:subheading>Apakah Anda yakin ingin menolak lamaran dari kandidat ini? Tindakan ini tidak dapat dibatalkan.</flux:subheading>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <flux:modal.close>
+                    <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
+                </flux:modal.close>
+                <flux:button
+                    variant="danger"
+                    icon="x-mark"
+                    class="cursor-pointer"
+                    wire:click="reject"
+                >
+                    Ya, Tolak Lamaran
                 </flux:button>
             </div>
         </div>
