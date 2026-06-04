@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Public\PositionController as PublicPositionControll
 use App\Http\Controllers\Api\Employee\ProfileController;
 use App\Http\Controllers\Api\HR\ApplicationController as HRApplicationController;
 use App\Http\Controllers\Api\HR\DecisionController;
+use App\Http\Controllers\Api\HR\DashBoardController as HRDashboardController;
 use App\Http\Controllers\Api\HR\EmployeeController as HREmployeeController;
 use App\Http\Controllers\Api\HR\InterviewController;
 use App\Http\Controllers\Api\HR\MAIRCAController;
@@ -168,6 +169,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/employees', [HREmployeeController::class, 'index'])->name('employees.index');
         Route::get('/employees/{id}', [HREmployeeController::class, 'show'])->name('employees.show');
         Route::put('/employees/{id}', [HREmployeeController::class, 'update'])->name('employees.update');
+
+        // DASHBOARD
+        Route::get('/dashboard', [HRDashboardController::class, 'index'])->name('dashboard');
     });
 
     // ──────────────────────────────────────────────────────────────────────
