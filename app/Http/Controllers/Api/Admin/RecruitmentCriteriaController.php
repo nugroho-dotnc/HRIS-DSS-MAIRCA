@@ -63,6 +63,64 @@ class RecruitmentCriteriaController extends Controller
         ]);
     }
 
+    #[OA\Get(
+        path: '/admin/positions/{id}/criteria',
+        summary: 'Mendapatkan daftar kriteria berdasarkan ID posisi',
+        description: 'Mengambil daftar kriteria MAIRCA yang terhubung ke satu posisi tertentu.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'ID posisi', schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Daftar kriteria berhasil diambil',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Daftar kriteria berhasil diambil.'),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'object',
+                            properties: [
+                                new OA\Property(property: 'position', type: 'object'),
+                                new OA\Property(property: 'criteria', type: 'array', items: new OA\Items(ref: '#/components/schemas/RecruitmentCriteria')),
+                                new OA\Property(property: 'total_weight', type: 'number', example: 100)
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'Posisi tidak ditemukan'),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
+    public function getByPosition(string $id): JsonResponse
+    {
+        $position = \App\Models\Position::findOrFail($id);
+        
+        $criteria = RecruitmentCriteria::with(['likertScales'])
+            ->where('position_id', $id)
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar kriteria berdasarkan posisi berhasil diambil.',
+            'data' => [
+                'position' => [
+                    'id' => $position->id,
+                    'position_name' => $position->position_name,
+                ],
+                'criteria' => $criteria,
+                'total_weight' => (float) $criteria->sum('weight'),
+            ],
+        ]);
+    }
+
     #[OA\Post(
         path: '/admin/criteria',
         summary: 'Membuat kriteria MAIRCA baru',

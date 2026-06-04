@@ -111,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/positions/{id}', [PositionController::class, 'show'])->name('positions.show');
         Route::put('/positions/{id}', [PositionController::class, 'update'])->name('positions.update');
         Route::delete('/positions/{id}', [PositionController::class, 'destroy'])->name('positions.destroy');
+        Route::get('/positions/{id}/criteria', [RecruitmentCriteriaController::class, 'getByPosition'])->name('positions.criteria');
 
         // DSS MAIRCA Criteria Management
         Route::get('/criteria', [RecruitmentCriteriaController::class, 'index'])->name('criteria.index');
