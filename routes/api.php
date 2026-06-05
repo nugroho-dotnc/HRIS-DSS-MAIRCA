@@ -89,6 +89,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // ──────────────────────────────────────────────────────────────────────
     Route::middleware('role:admin')->prefix('admin')->name('api.admin.')->group(function () {
 
+        // Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\Api\Admin\DashboardController::class, 'index'])->name('dashboard');
+
         // User Management
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
