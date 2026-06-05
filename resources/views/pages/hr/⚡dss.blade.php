@@ -4,7 +4,7 @@ use App\Models\Vacancies;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-new #[Layout('layouts::hr', ['page_title' => 'Hasil DSS', 'page_description' => 'Daftar lowongan yang siap dihitung peringkat kandidatnya'])] class extends Component
+new #[Layout('layouts::hr', ['page_title' => 'Hasil DSS', 'page_description' => 'Lowongan berikut sudah melewati masa deadline. Klik Lihat Hasil untuk melihat peringkat kandidat berdasarkan perhitungan MAIRCA.'])] class extends Component
 {
     public function vacancies()
     {
@@ -19,14 +19,6 @@ new #[Layout('layouts::hr', ['page_title' => 'Hasil DSS', 'page_description' => 
 
 <div class="flex flex-1 flex-col gap-8">
     <livewire:bread-crumbs/>
-
-    {{-- Header --}}
-    <div class="flex flex-col gap-1">
-        <h1 class="text-xl font-bold text-zinc-900 dark:text-white">Hasil DSS MAIRCA</h1>
-        <p class="text-sm text-zinc-500 dark:text-zinc-400">
-            Lowongan berikut sudah melewati masa deadline. Klik <strong>Lihat Hasil</strong> untuk melihat peringkat kandidat berdasarkan perhitungan MAIRCA.
-        </p>
-    </div>
 
     @php $vacancies = $this->vacancies(); @endphp
 
