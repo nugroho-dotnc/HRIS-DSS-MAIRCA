@@ -12,6 +12,84 @@
         }
     ],
     "paths": {
+        "/admin/dashboard": {
+            "get": {
+                "tags": [
+                    "Admin - Dashboard"
+                ],
+                "summary": "Mendapatkan data ringkasan admin dashboard",
+                "description": "Mengambil data ringkasan untuk halaman dashboard admin (sama dengan versi web).",
+                "operationId": "be686afcd6505f72ff70dfdc967493be",
+                "responses": {
+                    "200": {
+                        "description": "Data dashboard berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data dashboard berhasil diambil."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "stats": {
+                                                    "type": "object"
+                                                },
+                                                "role_distribution": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "master_data_health": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "latest_users": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "positions_criteria": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/admin/departments": {
             "get": {
                 "tags": [
@@ -375,7 +453,7 @@
                     "Admin - Positions"
                 ],
                 "summary": "Mendapatkan daftar posisi",
-                "description": "Mengambil semua data posisi beserta departemennya.",
+                "description": "Mengambil semua data posisi beserta departemennya tanpa pagination, dan menyertakan total kriteria serta bobotnya.",
                 "operationId": "8163bfca0bd0cae740b5fac4c5ea390f",
                 "parameters": [
                     {
@@ -395,16 +473,6 @@
                         "schema": {
                             "type": "boolean"
                         }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Jumlah data per halaman",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 20
-                        }
                     }
                 ],
                 "responses": {
@@ -418,24 +486,33 @@
                                             "type": "boolean",
                                             "example": true
                                         },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar posisi berhasil diambil."
+                                        },
                                         "data": {
-                                            "properties": {
-                                                "current_page": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "data": {
-                                                    "type": "array",
-                                                    "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "allOf": [
+                                                    {
                                                         "$ref": "#/components/schemas/Position"
+                                                    },
+                                                    {
+                                                        "properties": {
+                                                            "total_criteria": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "total_weight": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 100
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
-                                                },
-                                                "total": {
-                                                    "type": "integer",
-                                                    "example": 50
-                                                }
-                                            },
-                                            "type": "object"
+                                                ]
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -928,6 +1005,84 @@
                                 }
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/admin/positions/{id}/criteria": {
+            "get": {
+                "tags": [
+                    "Admin - Criteria"
+                ],
+                "summary": "Mendapatkan daftar kriteria berdasarkan ID posisi",
+                "description": "Mengambil daftar kriteria MAIRCA yang terhubung ke satu posisi tertentu.",
+                "operationId": "7e009f1d1ac98d77a8b63a286afef48a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID posisi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar kriteria berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar kriteria berhasil diambil."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "position": {
+                                                    "type": "object"
+                                                },
+                                                "criteria": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/RecruitmentCriteria"
+                                                    }
+                                                },
+                                                "total_weight": {
+                                                    "type": "number",
+                                                    "example": 100
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Posisi tidak ditemukan"
                     },
                     "500": {
                         "description": "Server Error"
@@ -2391,6 +2546,130 @@
                 ]
             }
         },
+        "/applications/generate-code": {
+            "post": {
+                "tags": [
+                    "Public - Candidate"
+                ],
+                "summary": "Generate Application Code",
+                "description": "Membuat Application Code unik berdasarkan email kandidat dan ID lowongan yang dituju. Endpoint ini bersifat publik dan merupakan langkah pertama sebelum kandidat mengirim lamaran lengkap via POST /apply. Jika kandidat dengan email tersebut sudah pernah apply ke lowongan yang sama, mengembalikan kode yang sudah ada.",
+                "operationId": "ca64d94c121daf20fa0d24aee8efa116",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "vacancy_id"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Email kandidat",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "budi@example.com"
+                                    },
+                                    "vacancy_id": {
+                                        "description": "ID lowongan yang dituju",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Application Code berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Application Code berhasil dibuat."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "application_code": {
+                                                    "type": "string",
+                                                    "example": "APP-2026-ABCXYZ"
+                                                },
+                                                "vacancy_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "vacancy_title": {
+                                                    "type": "string",
+                                                    "example": "Senior Software Engineer"
+                                                },
+                                                "candidate_email": {
+                                                    "type": "string",
+                                                    "example": "budi@example.com"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "applied"
+                                                },
+                                                "note": {
+                                                    "type": "string",
+                                                    "example": "Simpan Application Code ini. Gunakan untuk melengkapi lamaran via POST /api/apply atau melacak status via GET /api/track/{code}."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Application Code sudah ada (kandidat sudah pernah apply ke lowongan ini)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Anda sudah memiliki Application Code untuk lowongan ini."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal atau lowongan tidak tersedia",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                }
+            }
+        },
         "/apply": {
             "post": {
                 "tags": [
@@ -3378,6 +3657,55 @@
                                 }
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "hr/dashboard": {
+            "get": {
+                "tags": [
+                    "HR - Dashboard"
+                ],
+                "summary": "Mendapatkan data ringkasan dashboad HR",
+                "description": "Mengambil data statistik utama, recruitment pipeline, interview mendatang, lowongan yang akan segera tutup, dan lamaran masuk terbaru.",
+                "operationId": "c6e5728a95f5c7f4bee197c09603fbe3",
+                "responses": {
+                    "200": {
+                        "description": "Data dashboard HR berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data dashboard HR berhasil diambil"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
                     },
                     "500": {
                         "description": "Server Error"
@@ -5115,6 +5443,207 @@
                 ]
             }
         },
+        "/departments": {
+            "get": {
+                "tags": [
+                    "Public - Departments"
+                ],
+                "summary": "Mendapatkan daftar departemen (publik)",
+                "description": "Mengambil semua departemen yang aktif. Endpoint ini bersifat publik dan tidak memerlukan autentikasi.",
+                "operationId": "0910e84df74496fd78178381667edac9",
+                "parameters": [
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "Filter berdasarkan status aktif (default: true)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar departemen berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Department"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                }
+            }
+        },
+        "/departments/{id}": {
+            "get": {
+                "tags": [
+                    "Public - Departments"
+                ],
+                "summary": "Melihat detail departemen (publik)",
+                "description": "Mengambil data detail satu departemen beserta daftar posisi aktif yang dimilikinya. Endpoint ini bersifat publik.",
+                "operationId": "7a1c5d58037eae688c19043eff316abe",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID departemen",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail departemen berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Department"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Departemen tidak ditemukan"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                }
+            }
+        },
+        "/positions": {
+            "get": {
+                "tags": [
+                    "Public - Positions"
+                ],
+                "summary": "Mendapatkan daftar posisi (publik)",
+                "description": "Mengambil semua posisi yang aktif beserta departemennya. Endpoint ini bersifat publik dan tidak memerlukan autentikasi.",
+                "operationId": "83fd36968c8e1349648d4972bf7290e3",
+                "parameters": [
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID departemen",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "Filter berdasarkan status aktif (default: true)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar posisi berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Position"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                }
+            }
+        },
+        "/positions/{id}": {
+            "get": {
+                "tags": [
+                    "Public - Positions"
+                ],
+                "summary": "Melihat detail posisi (publik)",
+                "description": "Mengambil data detail satu posisi beserta departemennya. Endpoint ini bersifat publik.",
+                "operationId": "8c6b1f2afcc4549b0e95b8ed1d975a90",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID posisi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail posisi berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Position"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Posisi tidak ditemukan"
+                    },
+                    "500": {
+                        "description": "Server Error"
+                    }
+                }
+            }
+        },
         "/supervisor/profile": {
             "get": {
                 "tags": [
@@ -5611,6 +6140,10 @@
     },
     "tags": [
         {
+            "name": "Admin - Dashboard",
+            "description": "Admin - Dashboard"
+        },
+        {
             "name": "Admin - Departments",
             "description": "Admin - Departments"
         },
@@ -5655,6 +6188,10 @@
             "description": "HR - Applications"
         },
         {
+            "name": "HR - Dashboard",
+            "description": "HR - Dashboard"
+        },
+        {
             "name": "HR - Decisions",
             "description": "HR - Decisions"
         },
@@ -5673,6 +6210,14 @@
         {
             "name": "HR - Vacancies",
             "description": "HR - Vacancies"
+        },
+        {
+            "name": "Public - Departments",
+            "description": "Public - Departments"
+        },
+        {
+            "name": "Public - Positions",
+            "description": "Public - Positions"
         },
         {
             "name": "Supervisor - Dashboard",

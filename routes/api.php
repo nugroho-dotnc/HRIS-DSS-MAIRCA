@@ -140,6 +140,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Vacancy Management
         Route::get('/vacancies', [HRVacancyController::class, 'index'])->name('vacancies.index');
+        Route::get('/positions', [HRVacancyController::class, 'getPositions'])->name('vacancies.positions');
         Route::post('/vacancies', [HRVacancyController::class, 'store'])->name('vacancies.store');
         Route::get('/vacancies/{id}', [HRVacancyController::class, 'show'])->name('vacancies.show');
         Route::put('/vacancies/{id}', [HRVacancyController::class, 'update'])->name('vacancies.update');

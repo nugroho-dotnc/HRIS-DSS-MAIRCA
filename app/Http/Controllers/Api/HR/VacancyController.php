@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\Position;
 use App\Models\Vacancies;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -127,7 +128,7 @@ class VacancyController extends Controller
             'description' => $request->description,
             'requirements' => $request->requirements,
             'deadline' => $request->deadline,
-            'status' => 'open',
+            'status' => $request->status
         ]);
 
         return response()->json([
@@ -344,6 +345,26 @@ class VacancyController extends Controller
             'success' => true,
             'message' => 'Lowongan berhasil dihapus.',
             'data' => null,
+        ]);
+    }
+
+    public function getPositions() {
+        $query = Position::with('department')
+            ->withCount('recruitment_criteria')
+            ->withSum('recruitment_criteria', 'weight');
+
+        $positions = $query->orderBy('position_name')->get()->map(function ($position) {
+            $data = $position->toArray();
+            $data['total_criteria'] = $position->recruitment_criteria_count;
+            $data['total_weight'] = (float) ($position->recruitment_criteria_sum_weight ?? 0);
+            unset($data['recruitment_criteria_count'], $data['recruitment_criteria_sum_weight']);
+            return $data;
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar posisi berhasil diambil.',
+            'data' => $positions,
         ]);
     }
 }
