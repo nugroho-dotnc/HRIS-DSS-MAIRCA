@@ -6,14 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\RecruitmentResult;
 use App\Models\Vacancies;
-use App\Services\MAIRCAService;
+use App\Services\MAIRCA;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class MAIRCAController extends Controller
 {
-    public function __construct(protected MAIRCAService $maircaService)
+    public function __construct(protected MAIRCA $maircaService)
     {
     }
 
