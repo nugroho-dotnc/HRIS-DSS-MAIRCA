@@ -240,7 +240,7 @@ class VacancyController extends Controller
             'position_id' => 'sometimes|exists:positions,id',
         ]);
 
-        $vacancy->fill($request->only(['title', 'description', 'requirements', 'deadline', 'position_id']));
+        $vacancy->fill($request->only(['title', 'description', 'requirements', 'deadline', 'position_id', 'status']));
         $vacancy->save();
 
         return response()->json([
