@@ -51,6 +51,14 @@ class MAIRCAController extends Controller
         try {
             $result = $this->maircaService->calculate((int) $vacancyId);
 
+            // simpan hasil perhitungan ke database
+            foreach ($result["ranking"] as $rankItem) {
+                RecruitmentResult::updateOrCreate(["application_id" => $rankItem["application_id"]], [
+                    "final_score" => $rankItem["qi_score"],
+                    "ranking" => $rankItem["rank"]
+                ]);
+            }
+
             // Trigger notifikasi ke semua candidate yang melamar posisi ini
             try {
                 app(NotificationService::class)->notifyDssCompleted((int) $vacancyId);

@@ -159,6 +159,7 @@ class MAIRCA
                 "rank" => $rank,
                 "candidate_name" => $alternatives[$i],
                 "application_id" => $alternativesIds[$i],
+                "status" => $applications[$i]->status,
                 "qi_score" => round($qi, 6),
                 "gap_details" => $gapMatrix[$i]
             ];

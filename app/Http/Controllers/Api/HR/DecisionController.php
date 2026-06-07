@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 
 class DecisionController extends Controller
@@ -64,7 +65,7 @@ class DecisionController extends Controller
     )]
     public function decide(Request $request, string $applicationId): JsonResponse
     {
-        $application = Application::with(['candidate', 'vacancy.position', 'result'])
+        $application = Application::with(['candidate', 'vacancy.position.department', 'result'])
             ->findOrFail($applicationId);
 
         if ($application->status !== 'interview_done') {
@@ -75,43 +76,109 @@ class DecisionController extends Controller
             ], 422);
         }
 
-        if (!$application->result) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Hasil kalkulasi MAIRCA belum ada untuk lamaran ini. Jalankan kalkulasi MAIRCA terlebih dahulu.',
-                'data' => null,
-            ], 422);
-        }
-
         $request->validate([
-            'decission' => ['required', Rule::in(['hired', 'rejected'])],
+            'decission' => ['required', \Illuminate\Validation\Rule::in(['hired', 'rejected'])],
             'notes' => 'nullable|string',
         ]);
 
-        // Update keputusan di recruitment_results
-        $application->result->decission = $request->decission;
-        $application->result->save();
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            // update atau buat record baru jika belum ada
+            if ($application->result) {
+                $application->result->decission = $request->decission;
+                $application->result->save();
+            } else {
+                RecruitmentResult::create([
+                    "application_id" => $application->id,
+                    "final_score" => 0.0,
+                    "ranking" => 99,
+                    "decission" => $request->decission
+                ]);
+            }
 
-        // Update status application
-        $application->status = $request->decission;
-        $application->save();
+            // Update status application
+            $application->status = $request->decission;
+            $application->save();
 
-        $message = $request->decission === 'hired'
-            ? 'Kandidat dinyatakan DITERIMA. Silakan lanjutkan proses onboarding.'
-            : 'Kandidat dinyatakan DITOLAK.';
+            // OTOMATISASI ONBOARDING JIKA STATUS = HIRED
+            if ($request->decission === 'hired') {
+                $candidate = $application->candidate;
+                $user = User::where("email", $candidate->email)->first();
 
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-            'data' => [
-                'application_id' => $application->id,
-                'candidate_name' => $application->candidate->name,
-                'decission' => $request->decission,
-                'mairca_ranking' => $application->result->ranking,
-                'mairca_score' => $application->result->final_score,
-            ],
-        ]);
+                // 1. Daftarkan / perbarui user menjadi employee
+                if ($user) {
+                    if ($user->role === "candidate") {
+                        $user->role = "employee";
+                        $user->save();
+                    }
+                } else {
+                    $user = User::create([
+                        "name" => $candidate->name,
+                        "email" => $candidate->email,
+                        "password" => Hash::make("password"),
+                        "role" => "employee",
+                        "status" => "active"
+                    ]);
+                }
+
+                // 2. Ambil departemen dan cari supervisor
+                $deptId = $application->vacancy->position->department->id;
+
+                $defaultSupervisor = Employee::where("department_id", $deptId)->whereHas("user", function ($query) {
+                    $query->where("role", "supervisor");
+                })->first();
+
+                if (!$defaultSupervisor) {
+                    $defaultSupervisor = Employee::whereHas("user", function ($query) {
+                        $query->where("role", "supervisor");
+                    })->first();
+                }
+
+                $supervisorId = $defaultSupervisor ? $defaultSupervisor->id : (Employee::first()?->id ?? 1);
+
+                // 3. Masukkan ke tabel employees jika belum ada
+                $exists = Employee::where("user_id", $user->id)->exists();
+                if (!$exists) {
+                    Employee::create([
+                        "user_id" => $user->id,
+                        "department_id" => $deptId,
+                        "position_id" => $application->vacancy->position->id,
+                        "supervisor_id" => $supervisorId,
+                        "join_date" => now()->toDateString(),
+                        "contract_status" => "probation",
+                    ]);
+                }
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            $application->load("result");
+
+            $message = $request->decission === 'hired'
+                ? 'Kandidat dinyatakan DITERIMA dan berhasil ditambahkan ke tabel employee.'
+                : 'Kandidat dinyatakan DITOLAK.';
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => [
+                    'application_id' => $application->id,
+                    'candidate_name' => $application->candidate->name,
+                    'decission' => $request->decission,
+                    'mairca_ranking' => $application->result->ranking,
+                    'mairca_score' => $application->result->final_score,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses keputusan: ' . $e->getMessage(),
+                'data' => null,
+            ], 500);
+        }
     }
+
 
     #[OA\Post(
         path: '/hr/onboarding/{applicationId}',
