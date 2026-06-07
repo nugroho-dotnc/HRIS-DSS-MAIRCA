@@ -1,6 +1,54 @@
 <?php
 
+use App\Mail\ApplicationHiredMail;
+use App\Mail\ApplicationReceivedMail;
+use App\Mail\ApplicationRejectedMail;
+use App\Mail\InterviewInvitationMail;
 use Illuminate\Support\Facades\Route;
+
+// ─── Email Preview Routes (local only) ───────────────────────────────────────
+if (app()->environment('local')) {
+    Route::prefix('_email-preview')->group(function () {
+
+        Route::get('/interview-invitation', fn () => new InterviewInvitationMail(
+            candidate_name:     'Budi Santoso',
+            vacancy_title:      'Software Engineer',
+            interview_date:     'Senin, 16 Juni 2026',
+            interview_time:     '10.00 – 11.00 WIB',
+            interview_location: 'Google Meet (link dikirim terpisah)',
+            interviewer_name:   'Siti Rahmawati, S.Psi.',
+            notes:              'Siapkan portofolio dan CV terbaru Anda.',
+            portal_url:         config('app.url').'/applications',
+        ))->name('email-preview.interview-invitation');
+
+        Route::get('/application-hired', fn () => new ApplicationHiredMail(
+            candidate_name:  'Budi Santoso',
+            vacancy_title:   'Software Engineer',
+            position_name:   'Junior Software Engineer',
+            department_name: 'Technology & Product',
+            start_date:      'Senin, 23 Juni 2026',
+            next_steps:      'Tim HR akan mengirimkan dokumen onboarding ke email Anda dalam 3 hari kerja.',
+            portal_url:      config('app.url').'/applications',
+        ))->name('email-preview.application-hired');
+
+        Route::get('/application-rejected', fn () => new ApplicationRejectedMail(
+            candidate_name:   'Budi Santoso',
+            vacancy_title:    'Software Engineer',
+            position_name:    'Junior Software Engineer',
+            rejection_reason: '',
+            vacancies_url:    config('app.url').'/vacancies',
+        ))->name('email-preview.application-rejected');
+
+        Route::get('/application-received', fn () => new ApplicationReceivedMail(
+            candidate_name:   'Budi Santoso',
+            vacancy_title:    'Software Engineer',
+            application_code: 'APP-2026-00123',
+            applied_at:       '7 Juni 2026, 20.00 WIB',
+            portal_url:       config('app.url').'/applications',
+        ))->name('email-preview.application-received');
+
+    });
+}
 
 Route::livewire('/', 'pages::welcome')->name('home');
 Route::livewire('/applications', 'pages::candidate.applications')->name('candidate.applications');

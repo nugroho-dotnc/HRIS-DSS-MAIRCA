@@ -3364,6 +3364,389 @@
                 ]
             }
         },
+        "/hr/fcm-tokens": {
+            "post": {
+                "tags": [
+                    "HR - FCM Token"
+                ],
+                "summary": "Register FCM Token (HR)",
+                "description": "Mendaftarkan atau memperbarui FCM token untuk user HR yang sedang login. Dipanggil saat Flutter app start atau saat token refresh.",
+                "operationId": "143bcc3f9f51d3e6dbd71913f12866d4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "fcm_token"
+                                ],
+                                "properties": {
+                                    "fcm_token": {
+                                        "description": "Firebase Cloud Messaging token dari device",
+                                        "type": "string",
+                                        "example": "dGVzdC10b2tlbi0xMjM0NTY..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "FCM token berhasil didaftarkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "FCM token berhasil didaftarkan."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validasi gagal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/fcm-tokens/candidate": {
+            "post": {
+                "tags": [
+                    "Public - FCM Token"
+                ],
+                "summary": "Register FCM Token (Candidate)",
+                "description": "Mendaftarkan FCM token untuk candidate menggunakan application_code sebagai identifier. Tidak memerlukan login. Dipanggil dari Flutter app saat candidate membuka tracking page.",
+                "operationId": "64e4d1f34e366f85ef8302085ed840a6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "fcm_token",
+                                    "application_code"
+                                ],
+                                "properties": {
+                                    "fcm_token": {
+                                        "description": "Firebase Cloud Messaging token dari device",
+                                        "type": "string",
+                                        "example": "dGVzdC10b2tlbi0xMjM0NTY..."
+                                    },
+                                    "application_code": {
+                                        "description": "Kode lamaran unik yang dimiliki candidate",
+                                        "type": "string",
+                                        "example": "APP-2026-ABCXYZ"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "FCM token berhasil didaftarkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "FCM token berhasil didaftarkan."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Application code tidak ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/fcm-tokens": {
+            "delete": {
+                "tags": [
+                    "Public - FCM Token"
+                ],
+                "summary": "Hapus FCM Token",
+                "description": "Menghapus FCM token dari database. Dipanggil saat user logout atau uninstall app. Endpoint ini bersifat publik karena candidate tidak memiliki login.",
+                "operationId": "8d554568a4275d935ebd40f260635d52",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "fcm_token"
+                                ],
+                                "properties": {
+                                    "fcm_token": {
+                                        "description": "FCM token yang akan dihapus",
+                                        "type": "string",
+                                        "example": "dGVzdC10b2tlbi0xMjM0NTY..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "FCM token berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "FCM token berhasil dihapus."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/hr/notifications": {
+            "get": {
+                "tags": [
+                    "HR - Notifications"
+                ],
+                "summary": "Riwayat Notifikasi HR",
+                "description": "Mengambil daftar notifikasi yang pernah diterima oleh user HR yang sedang login. Mendukung pagination.",
+                "operationId": "aa85377804b1bf1d85941acd854126d6",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah item per halaman (default: 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Nomor halaman",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar notifikasi berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar notifikasi berhasil diambil."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/notifications/candidate/{applicationCode}": {
+            "get": {
+                "tags": [
+                    "Public - Notifications"
+                ],
+                "summary": "Riwayat Notifikasi Candidate",
+                "description": "Mengambil daftar notifikasi untuk candidate berdasarkan application_code. Tidak memerlukan login.",
+                "operationId": "1452e60ece72da36f80aae3feb414fb9",
+                "parameters": [
+                    {
+                        "name": "applicationCode",
+                        "in": "path",
+                        "description": "Kode lamaran unik",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar notifikasi berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar notifikasi berhasil diambil."
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Application code tidak ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/{id}/read": {
+            "patch": {
+                "tags": [
+                    "Public - Notifications"
+                ],
+                "summary": "Tandai notifikasi sebagai sudah dibaca",
+                "description": "Mengubah status notifikasi menjadi sudah dibaca.",
+                "operationId": "d919be07d9e515d811d843219d6f63ec",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID notifikasi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notifikasi berhasil ditandai sebagai dibaca",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notifikasi berhasil ditandai sebagai dibaca."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notifikasi tidak ditemukan"
+                    }
+                }
+            }
+        },
         "/hr/applications": {
             "get": {
                 "tags": [
@@ -6182,6 +6565,22 @@
         {
             "name": "Employee - Profile",
             "description": "Employee - Profile"
+        },
+        {
+            "name": "HR - FCM Token",
+            "description": "HR - FCM Token"
+        },
+        {
+            "name": "Public - FCM Token",
+            "description": "Public - FCM Token"
+        },
+        {
+            "name": "HR - Notifications",
+            "description": "HR - Notifications"
+        },
+        {
+            "name": "Public - Notifications",
+            "description": "Public - Notifications"
         },
         {
             "name": "HR - Applications",

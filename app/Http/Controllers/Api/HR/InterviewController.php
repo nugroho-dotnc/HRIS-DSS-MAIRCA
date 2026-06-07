@@ -150,6 +150,8 @@ class InterviewController extends Controller
         $application->status = 'interview_scheduled';
         $application->save();
 
+        //MAILER
+
         return response()->json([
             'success' => true,
             'message' => 'Interview berhasil dijadwalkan.',

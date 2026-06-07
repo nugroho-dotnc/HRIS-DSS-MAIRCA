@@ -6,9 +6,12 @@ use Flux\Flux;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use App\Mail\InterviewInvitationMail;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 
-new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends Component
-{
+
+new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends Component {
     public $id;
 
     // Form penjadwalan interview
@@ -53,7 +56,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
     public function scheduleInterview(): void
     {
         $this->validate([
-            'interviewDate'  => [
+            'interviewDate' => [
                 'required',
                 'date',
                 function ($attribute, $value, $fail) {
@@ -66,17 +69,26 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
             'interviewNotes' => 'nullable|string|max:1000',
         ], [
             'interviewDate.required' => 'Tanggal & waktu interview wajib diisi.',
-            'interviewDate.date'     => 'Format tanggal & waktu tidak valid.',
-            'interviewNotes.max'     => 'Catatan tidak boleh lebih dari 1000 karakter.',
+            'interviewDate.date' => 'Format tanggal & waktu tidak valid.',
+            'interviewNotes.max' => 'Catatan tidak boleh lebih dari 1000 karakter.',
         ]);
 
         $application = Application::findOrFail($this->id);
+        Mail::to($application->candidate->email)->sendNow(new InterviewInvitationMail(
+            candidate_name: $application->candidate->name,
+            vacancy_title: $application->vacancy->title,
+            interview_date: Carbon::parse($this->interviewDate)->format('Y-m-d'),
+            interview_time: Carbon::parse($this->interviewDate)->format('H:i'),
+            interviewer_name: auth()->user()->name,
+            notes: $this->interviewNotes,
+            portal_url: 'http://localhost:8000/applications',
+        ));
 
         InterviewSession::create([
             'application_id' => $this->id,
             'interviewer_id' => auth()->id(),
             'interview_date' => $this->interviewDate,
-            'notes'          => $this->interviewNotes ?? '',
+            'notes' => $this->interviewNotes ?? '',
         ]);
 
         $application->status = 'interview_scheduled';
@@ -133,7 +145,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
 ?>
 
 <div class="flex flex-1 flex-col gap-6 rounded-xl">
-    <livewire:bread-crumbs/>
+    <livewire:bread-crumbs />
 
     @php $app = $this->application(); @endphp
 
@@ -141,7 +153,8 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
     <div class="flex items-start justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $app->candidate->name }}</h1>
-            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Kode Lamaran: <span class="font-mono">{{ $app->application_code }}</span></p>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Kode Lamaran : <span
+                    class="font-mono">{{ $app->application_code }}</span></p>
         </div>
         <div class="flex gap-2">
             @if($app->status === 'screening')
@@ -177,8 +190,11 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
             </flux:field>
 
             <flux:field>
-                <flux:label>Catatan <span class="ml-1.5"><flux:badge size="sm">Opsional</flux:badge></span></flux:label>
-                <flux:textarea wire:model="interviewNotes" placeholder="Tambahkan catatan untuk sesi interview ini..." rows="3" />
+                <flux:label>Catatan <span class="ml-1.5">
+                        <flux:badge size="sm">Opsional</flux:badge>
+                    </span></flux:label>
+                <flux:textarea wire:model="interviewNotes" placeholder="Tambahkan catatan untuk sesi interview ini..."
+                    rows="3" />
                 <flux:error name="interviewNotes" />
             </flux:field>
 
@@ -186,12 +202,8 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
                 <flux:modal.close>
                     <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
                 </flux:modal.close>
-                <flux:button
-                    variant="primary"
-                    icon="calendar-days"
-                    class="cursor-pointer"
-                    wire:click="scheduleInterview"
-                >
+                <flux:button variant="primary" icon="calendar-days" class="cursor-pointer"
+                    wire:click="scheduleInterview">
                     Simpan Jadwal
                 </flux:button>
             </div>
@@ -202,26 +214,22 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
         <div class="flex flex-col gap-6">
             <div>
                 <flux:heading size="lg">Tolak Lamaran</flux:heading>
-                <flux:subheading>Apakah Anda yakin ingin menolak lamaran dari kandidat ini? Tindakan ini tidak dapat dibatalkan.</flux:subheading>
+                <flux:subheading>Apakah Anda yakin ingin menolak lamaran dari kandidat ini? Tindakan ini tidak dapat
+                    dibatalkan.</flux:subheading>
             </div>
 
             <div class="flex justify-end gap-2">
                 <flux:modal.close>
                     <flux:button variant="ghost" class="cursor-pointer">Batal</flux:button>
                 </flux:modal.close>
-                <flux:button
-                    variant="danger"
-                    icon="x-mark"
-                    class="cursor-pointer"
-                    wire:click="reject"
-                >
+                <flux:button variant="danger" icon="x-mark" class="cursor-pointer" wire:click="reject">
                     Ya, Tolak Lamaran
                 </flux:button>
             </div>
         </div>
     </flux:modal>
 
-    <flux:separator/>
+    <flux:separator />
 
     {{-- Status Badge --}}
     <div class="flex items-center gap-3">
@@ -234,70 +242,87 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {{-- Card: Informasi Kandidat --}}
-        <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 flex flex-col gap-4 bg-white dark:bg-zinc-800/50">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
-                <flux:icon name="user" class="size-4"/> Data Kandidat
+        <div
+            class="rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 flex flex-col gap-4 bg-white dark:bg-zinc-800/50">
+            <h2
+                class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+                <flux:icon name="user" class="size-4" /> Data Kandidat
             </h2>
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1">
                     <span class="text-xs text-zinc-400">Nama Lengkap</span>
-                    <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->name }}</span>
+                    <span
+                        class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->name }}</span>
                 </div>
                 <div class="flex flex-col gap-1">
                     <span class="text-xs text-zinc-400">Email</span>
-                    <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->email }}</span>
+                    <span
+                        class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->email }}</span>
                 </div>
                 <div class="flex flex-col gap-1">
                     <span class="text-xs text-zinc-400">No. Telepon</span>
-                    <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->phone }}</span>
+                    <span
+                        class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->phone }}</span>
                 </div>
                 <div class="flex flex-col gap-1">
                     <span class="text-xs text-zinc-400">Jenis Kelamin</span>
-                    <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
+                    <span
+                        class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
                 </div>
                 <div class="flex flex-col gap-1">
                     <span class="text-xs text-zinc-400">Kota</span>
-                    <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->city }}</span>
+                    <span
+                        class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->city }}</span>
                 </div>
                 <div class="flex flex-col gap-1">
                     <span class="text-xs text-zinc-400">Kode Pos</span>
-                    <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->zip_code }}</span>
+                    <span
+                        class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->candidate->zip_code }}</span>
                 </div>
             </div>
 
             <div class="flex flex-col gap-1">
                 <span class="text-xs text-zinc-400">Alamat Lengkap</span>
-                <p class="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-line">{{ $app->candidate->complete_address }}</p>
+                <p class="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-line">
+                    {{ $app->candidate->complete_address }}
+                </p>
             </div>
 
-            <flux:separator/>
+            <flux:separator />
 
             <div class="flex flex-col gap-1">
                 <span class="text-xs text-zinc-400">Pengalaman</span>
-                <p class="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-line leading-relaxed">{{ $app->candidate->experience }}</p>
+                <p class="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-line leading-relaxed">
+                    {{ $app->candidate->experience }}
+                </p>
             </div>
         </div>
 
         {{-- Card: Informasi Lamaran --}}
         <div class="flex flex-col gap-6">
-            <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 flex flex-col gap-4 bg-white dark:bg-zinc-800/50">
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
-                    <flux:icon name="briefcase" class="size-4"/> Informasi Lamaran
+            <div
+                class="rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 flex flex-col gap-4 bg-white dark:bg-zinc-800/50">
+                <h2
+                    class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+                    <flux:icon name="briefcase" class="size-4" /> Informasi Lamaran
                 </h2>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-1">
                         <span class="text-xs text-zinc-400">Lowongan</span>
-                        <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->vacancy->title }}</span>
+                        <span
+                            class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->vacancy->title }}</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         <span class="text-xs text-zinc-400">Posisi</span>
-                        <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->vacancy->position->position_name ?? '-' }}</span>
+                        <span
+                            class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->vacancy->position->position_name ?? '-' }}</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         <span class="text-xs text-zinc-400">Departemen</span>
-                        <span class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->vacancy->position->department->department_name ?? '-' }}</span>
+                        <span
+                            class="text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ $app->vacancy->position->department->department_name ?? '-' }}</span>
                     </div>
                     <div class="flex flex-col gap-1">
                         <span class="text-xs text-zinc-400">Tanggal Melamar</span>
@@ -309,15 +334,18 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
             </div>
 
             {{-- Card: Dokumen --}}
-            <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 flex flex-col gap-4 bg-white dark:bg-zinc-800/50">
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
-                    <flux:icon name="document" class="size-4"/> Dokumen
+            <div
+                class="rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 flex flex-col gap-4 bg-white dark:bg-zinc-800/50">
+                <h2
+                    class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+                    <flux:icon name="document" class="size-4" /> Dokumen
                 </h2>
 
                 <div class="flex flex-col gap-3">
                     @if($app->candidate->cv_path)
-                        <a href="{{ asset('storage/' . $app->candidate->cv_path) }}" target="_blank" class="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                            <flux:icon name="document-arrow-down" class="size-4"/>
+                        <a href="{{ asset('storage/' . $app->candidate->cv_path) }}" target="_blank"
+                            class="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                            <flux:icon name="document-arrow-down" class="size-4" />
                             Download CV
                         </a>
                     @else
@@ -325,8 +353,9 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
                     @endif
 
                     @if($app->candidate->portofolio_path)
-                        <a href="{{ asset('storage/' . $app->candidate->portofolio_path) }}" target="_blank" class="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                            <flux:icon name="document-arrow-down" class="size-4"/>
+                        <a href="{{ asset('storage/' . $app->candidate->portofolio_path) }}" target="_blank"
+                            class="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                            <flux:icon name="document-arrow-down" class="size-4" />
                             Download Portofolio
                         </a>
                     @else
@@ -334,8 +363,9 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
                     @endif
 
                     @if($app->candidate->web_portofolio_url)
-                        <a href="{{ $app->candidate->web_portofolio_url }}" target="_blank" class="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                            <flux:icon name="globe-alt" class="size-4"/>
+                        <a href="{{ $app->candidate->web_portofolio_url }}" target="_blank"
+                            class="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                            <flux:icon name="globe-alt" class="size-4" />
                             Portofolio Web
                         </a>
                     @else
@@ -346,9 +376,11 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
 
             {{-- Card: Interview Sessions (jika ada) --}}
             @if($app->interviewSessions->count() > 0)
-                <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 flex flex-col gap-4 bg-white dark:bg-zinc-800/50">
-                    <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
-                        <flux:icon name="chat-bubble-left-right" class="size-4"/> Sesi Interview
+                <div
+                    class="rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 flex flex-col gap-4 bg-white dark:bg-zinc-800/50">
+                    <h2
+                        class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+                        <flux:icon name="chat-bubble-left-right" class="size-4" /> Sesi Interview
                     </h2>
 
                     <div class="flex flex-col gap-3">

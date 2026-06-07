@@ -7,17 +7,25 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-new #[Layout('layouts::hr', ['page_title' => 'Review Lamaran', 'page_description' => 'Kelola dan review lamaran yang masuk'])] class extends Component
-{
+new #[Layout('layouts::hr', ['page_title' => 'Review Lamaran', 'page_description' => 'Kelola dan review lamaran yang masuk'])] class extends Component {
     use WithPagination;
 
     public $search = '';
     public $filterStatus = '';
     public $filterVacancy = '';
 
-    public function updatedSearch() { $this->resetPage(); }
-    public function updatedFilterStatus() { $this->resetPage(); }
-    public function updatedFilterVacancy() { $this->resetPage(); }
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+    public function updatedFilterStatus()
+    {
+        $this->resetPage();
+    }
+    public function updatedFilterVacancy()
+    {
+        $this->resetPage();
+    }
 
     public function applications()
     {
@@ -28,7 +36,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Review Lamaran', 'page_description
             $search = $this->search;
             $query->whereHas('candidate', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -112,7 +120,8 @@ new #[Layout('layouts::hr', ['page_title' => 'Review Lamaran', 'page_description
 
         {{-- Header: Search & Filters --}}
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <flux:input wire:model.live.debounce.300ms="search" type="text" class="w-full max-w-md" icon="magnifying-glass" placeholder="Cari nama atau email kandidat..." />
+            <flux:input wire:model.live.debounce.300ms="search" type="text" class="w-full max-w-md"
+                icon="magnifying-glass" placeholder="Cari nama atau email kandidat..." />
 
             <div class="flex gap-2">
                 <flux:select wire:model.live="filterStatus" placeholder="Semua Status" class="min-w-[160px]">
@@ -167,25 +176,29 @@ new #[Layout('layouts::hr', ['page_title' => 'Review Lamaran', 'page_description
                                 {{ \Carbon\Carbon::parse($app->created_at)->translatedFormat('d M Y') }}
                             </flux:table.cell>
                             <flux:table.cell variant="strong" class="space-x-2">
-                                <flux:button icon="eye" size="sm" class="cursor-pointer" href="{{ route('hr.applications.show', $app->id) }}" wire:navigate>Detail</flux:button>
+                                <flux:button icon="eye" size="sm" class="cursor-pointer"
+                                    href="{{ route('hr.applications.show', $app->id) }}" wire:navigate>Detail</flux:button>
 
-                                {{-- @if($app->status === 'applied' || in_array($app->status, ['screening', 'interview_scheduled']))
-                                    <flux:dropdown position="bottom" align="end">
-                                        <flux:button icon="ellipsis-horizontal" size="sm" variant="ghost" class="cursor-pointer" />
+                                {{-- @if($app->status === 'applied' || in_array($app->status, ['screening',
+                                'interview_scheduled']))
+                                <flux:dropdown position="bottom" align="end">
+                                    <flux:button icon="ellipsis-horizontal" size="sm" variant="ghost" class="cursor-pointer" />
 
-                                        <flux:menu>
-                                            @if($app->status === 'applied')
-                                                <flux:menu.item icon="arrow-right-circle" wire:click="moveToScreening({{ $app->id }})" wire:confirm="Pindahkan lamaran ini ke tahap screening?">
-                                                    Screening
-                                                </flux:menu.item>
-                                            @endif
-                                            @if(in_array($app->status, ['applied', 'screening', 'interview_scheduled']))
-                                                <flux:menu.item icon="x-circle" variant="danger" wire:click="reject({{ $app->id }})" wire:confirm="Yakin ingin menolak lamaran ini?">
-                                                    Tolak
-                                                </flux:menu.item>
-                                            @endif
-                                        </flux:menu>
-                                    </flux:dropdown>
+                                    <flux:menu>
+                                        @if($app->status === 'applied')
+                                        <flux:menu.item icon="arrow-right-circle" wire:click="moveToScreening({{ $app->id }})"
+                                            wire:confirm="Pindahkan lamaran ini ke tahap screening?">
+                                            Screening
+                                        </flux:menu.item>
+                                        @endif
+                                        @if(in_array($app->status, ['applied', 'screening', 'interview_scheduled']))
+                                        <flux:menu.item icon="x-circle" variant="danger" wire:click="reject({{ $app->id }})"
+                                            wire:confirm="Yakin ingin menolak lamaran ini?">
+                                            Tolak
+                                        </flux:menu.item>
+                                        @endif
+                                    </flux:menu>
+                                </flux:dropdown>
                                 @endif --}}
                             </flux:table.cell>
                         </flux:table.row>
