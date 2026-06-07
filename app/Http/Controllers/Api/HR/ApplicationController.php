@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\HR;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ApplicationRejectedMail;
 use App\Models\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use OpenApi\Attributes as OA;
 
 class ApplicationController extends Controller
@@ -223,6 +225,12 @@ class ApplicationController extends Controller
 
         $application->status = 'rejected';
         $application->save();
+
+        Mail::to($application->candidate->email)->sendNow(new ApplicationRejectedMail(
+            candidate_name: $application->candidate->name,
+            vacancy_title: $application->vacancy->title,
+            position_name: $application->vacancy->position->position_name,
+        ));
 
         return response()->json([
             'success' => true,

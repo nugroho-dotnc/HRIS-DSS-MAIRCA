@@ -93,6 +93,38 @@
     </div>
     @endif
 
+    <!-- ── Credentials ───────────────────────────────────── -->
+    @if(!empty($login_email))
+    <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin-bottom:28px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
+            <tr>
+                <td width="20" style="vertical-align:middle;padding-right:8px;">
+                    <!-- Heroicon: key (solid) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#475569" width="16" height="16" style="display:block;">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-5.5-2.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zM10 12a5.99 5.99 0 00-4.793 2.39A6.48 6.48 0 0010 16.5c1.673 0 3.205-.63 4.793-2.11A5.99 5.99 0 0010 12z" clip-rule="evenodd" />
+                    </svg>
+                </td>
+                <td>
+                    <span style="font-size:13px;font-weight:700;color:#1e293b;text-transform:uppercase;letter-spacing:0.5px;">Kredensial Akun Karyawan</span>
+                </td>
+            </tr>
+        </table>
+        <p style="margin:0 0 12px;font-size:14px;color:#475569;line-height:1.6;">
+            Akun Anda telah dikonfigurasi untuk mengakses Dashboard Karyawan. Silakan gunakan kredensial berikut untuk masuk:
+        </p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:14px;color:#1e293b;background-color:#ffffff;border:1px solid #f1f5f9;border-radius:6px;padding:10px 12px;">
+            <tr>
+                <td width="80" style="padding:4px 0;color:#64748b;font-weight:600;">Email:</td>
+                <td style="padding:4px 0;font-family:monospace;font-weight:700;color:#0f766e;">{{ $login_email }}</td>
+            </tr>
+            <tr>
+                <td style="padding:4px 0;color:#64748b;font-weight:600;">Password:</td>
+                <td style="padding:4px 0;font-family:monospace;font-weight:700;color:#0f766e;">{{ $login_password }}</td>
+            </tr>
+        </table>
+    </div>
+    @endif
+
     <!-- ── Body text ─────────────────────────────────────── -->
     <p style="margin:0 0 28px;font-size:14px;color:#52525b;line-height:1.7;">
         Tim HR kami akan segera menghubungi Anda dengan informasi lebih lanjut mengenai onboarding.

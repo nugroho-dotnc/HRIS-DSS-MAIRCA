@@ -24,6 +24,8 @@ class ApplicationHiredMail extends Mailable implements ShouldQueue
         public string $start_date = '',
         public string $next_steps = '',
         public string $portal_url = '',
+        public string $login_email = '',
+        public string $login_password = '',
     ) {
         $this->portal_url = $portal_url ?: config('app.url');
     }

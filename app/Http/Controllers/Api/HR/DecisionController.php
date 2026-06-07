@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ApplicationHiredMail;
+use App\Mail\ApplicationRejectedMail;
 
 class DecisionController extends Controller
 {
@@ -100,6 +103,8 @@ class DecisionController extends Controller
             $application->status = $request->decission;
             $application->save();
 
+            $isNewUser = false;
+
             // OTOMATISASI ONBOARDING JIKA STATUS = HIRED
             if ($request->decission === 'hired') {
                 $candidate = $application->candidate;
@@ -119,6 +124,7 @@ class DecisionController extends Controller
                         "role" => "employee",
                         "status" => "active"
                     ]);
+                    $isNewUser = true;
                 }
 
                 // 2. Ambil departemen dan cari supervisor
@@ -152,11 +158,42 @@ class DecisionController extends Controller
 
             \Illuminate\Support\Facades\DB::commit();
 
+            // Kirim notifikasi email secara langsung (synchronous via sendNow)
+            try {
+                $candidate = $application->candidate;
+                if ($request->decission === 'hired') {
+                    $loginPasswordText = $isNewUser 
+                        ? 'password' 
+                        : '(Gunakan password akun kandidat Anda)';
+
+                    Mail::to($candidate->email)->sendNow(new ApplicationHiredMail(
+                        candidate_name: $candidate->name,
+                        vacancy_title: $application->vacancy->title,
+                        position_name: $application->vacancy->position->position_name,
+                        department_name: $application->vacancy->position->department->department_name,
+                        start_date: now()->toDateString(),
+                        next_steps: 'Harap tunggu instruksi onboarding selanjutnya dari tim HR kami.',
+                        portal_url: config('app.url'),
+                        login_email: $candidate->email,
+                        login_password: $loginPasswordText
+                    ));
+                } else {
+                    Mail::to($candidate->email)->sendNow(new ApplicationRejectedMail(
+                        candidate_name: $candidate->name,
+                        vacancy_title: $application->vacancy->title,
+                        position_name: $application->vacancy->position->position_name,
+                        rejection_reason: $request->notes ?? 'Kualifikasi belum memenuhi kebutuhan posisi saat ini.'
+                    ));
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Gagal mengirim email keputusan rekrutmen: ' . $e->getMessage());
+            }
+
             $application->load("result");
 
             $message = $request->decission === 'hired'
-                ? 'Kandidat dinyatakan DITERIMA dan berhasil ditambahkan ke tabel employee.'
-                : 'Kandidat dinyatakan DITOLAK.';
+                ? 'Kandidat dinyatakan DITERIMA, akun employee berhasil dibuat/di-upgrade, dan notifikasi email berhasil dikirim.'
+                : 'Kandidat dinyatakan DITOLAK dan notifikasi email berhasil dikirim.';
 
             return response()->json([
                 'success' => true,
@@ -165,8 +202,8 @@ class DecisionController extends Controller
                     'application_id' => $application->id,
                     'candidate_name' => $application->candidate->name,
                     'decission' => $request->decission,
-                    'mairca_ranking' => $application->result->ranking,
-                    'mairca_score' => $application->result->final_score,
+                    'mairca_ranking' => $application->result ? $application->result->ranking : null,
+                    'mairca_score' => $application->result ? $application->result->final_score : null,
                 ],
             ]);
         } catch (\Exception $e) {

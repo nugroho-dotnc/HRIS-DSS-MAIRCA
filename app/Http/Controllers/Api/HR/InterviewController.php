@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api\HR;
 
 use App\Http\Controllers\Controller;
+use App\Mail\InterviewInvitationMail;
 use App\Models\Application;
 use App\Models\InterviewScore;
 use App\Models\InterviewSession;
 use App\Models\RecruitmentCriteria;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use OpenApi\Attributes as OA;
 
 class InterviewController extends Controller
@@ -158,7 +161,15 @@ class InterviewController extends Controller
         $application->save();
 
         //MAILER
-
+        Mail::to($application->candidate->email)->sendNow(new InterviewInvitationMail(
+            candidate_name: $application->candidate->name,
+            vacancy_title: $application->vacancy->title,
+            interview_date: Carbon::parse($request->interview_date)->format('Y-m-d'),
+            interview_time: Carbon::parse($request->interview_date)->format('H:i'),
+            interviewer_name: auth()->user()->name,
+            notes: $request->notes,
+            portal_url: 'http://localhost:8000/applications',
+        ));
         return response()->json([
             'success' => true,
             'message' => 'Interview berhasil dijadwalkan.',

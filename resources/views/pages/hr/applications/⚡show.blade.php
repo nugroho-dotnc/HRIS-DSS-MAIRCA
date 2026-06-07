@@ -74,6 +74,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Detail Lamaran'])] class extends C
         ]);
 
         $application = Application::findOrFail($this->id);
+
         Mail::to($application->candidate->email)->sendNow(new InterviewInvitationMail(
             candidate_name: $application->candidate->name,
             vacancy_title: $application->vacancy->title,
