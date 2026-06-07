@@ -4,6 +4,13 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Services\MAIRCA;
 use App\Services\NotificationService;
+use App\Models\Application;
+use App\Models\RecruitmentResult;
+use App\Models\User;
+use App\Models\Employee;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Flux\Flux;
 
 new #[Layout('layouts::hr', [
     'page_title' => 'Hasil Perhitungan MAIRCA',
@@ -30,14 +37,119 @@ new #[Layout('layouts::hr', [
             return $e->getMessage();
         }
     }
+
+    public function decideHired(int $applicationId){
+        DB::beginTransaction();
+        try{
+            $application = Application::with(["candidate", "vacancy.position.department", "result"])->findOrFail($applicationId);
+
+            // update keputusan di tabel recruitment_results
+            if($application->result){
+                $application->result->decission = "hired";
+                $application->result->save();
+            }else{
+                RecruitmentResult::create([
+                    "application_id" => $applicationId,
+                    "final_score" => 0.0,
+                    "ranking" => 1,
+                    "decission" => "hired",
+                ]);
+            }
+
+            // update status lamaran ke "hired"
+            $application->status = "hired";
+            $application->save();
+
+            // daftarkan candidate sebagai user dengan role "employee"
+            $candidate = $application->candidate;
+            $user = User::where("email", $candidate->email)->first();
+
+            if($user){
+                if($user->role === "candidate"){
+                    $user->role = "employee";
+                    $user->save();
+                }
+            }else{
+                $user = User::create([
+                    "name" => $candidate->name,
+                    "email" => $candidate->email,
+                    "password" => Hash::make("password"),
+                    "role" => "employee",
+                    "status" => "active"
+                ]);
+            }
+
+            // masukkan data ke tabel employees dengan supervisor dari departemen terkait
+            $deptId = $application->vacancy->position->department->id;
+            
+            // cari supervisor di departemen yang sama
+            $defaultSupervisor = Employee::where("department_id", $deptId)->whereHas("user", function($query){
+                $query->where("role", "supervisor");
+            })->first();
+
+            // fallback 1: kalo ga ada supervisor di departemen terkait, ambil id supervisor dari departemen lain
+            if(!$defaultSupervisor){
+                $defaultSupervisor = Employee::whereHas("user", function($query){
+                    $query->where("role", "supervisor");
+                })->first();
+            }
+
+            // fallback 2: kalo ga ada user dengan role "supervisor", maka gunakan employee pertama yang terdaftar
+            $supervisorId = $defaultSupervisor ? $defaultSupervisor->id : (Employee::first()?->id ?? 1);
+
+            $exists = Employee::where("user_id", $user->id)->exists();
+
+            if(!$exists){
+                Employee::create([
+                    "user_id" => $user->id,
+                    "department_id" => $deptId,
+                    "position_id" => $application->vacancy->position->id,
+                    "supervisor_id" => $supervisorId,
+                    "join_date" => now()->toDateString(),
+                    "contract_status" => "probation",
+                ]);
+            }
+
+            DB::commit();
+            Flux::toast("Kandidat {$candidate->name} berhasil diterima dan ditambahkan ke tabel employee.");
+        }catch(\Exception $e){
+            DB::rollback();
+            Flux::toast("Gagal memproses penerimaan: " . $e->getMessage(), variant: "danger");
+        }
+    }
+
+    public function decideRejected(int $applicationId){
+        try{
+            $application = Application::findOrFail($applicationId);
+
+            // update keputusan di tabel recruitment_results
+            if($application->result){
+                $application->result->decission = "rejected";
+                $application->result->save();
+            }else{
+                RecruitmentResult::create([
+                    "application_id" => $applicationId,
+                    "final_score" => 0.0,
+                    "ranking" => 99,
+                    "decission" => "rejected",
+                ]);
+            }
+
+            // update status lamaran ke "rejected"
+            $application->status = "rejected";
+            $application->save();
+
+            Flux::toast("Kandidat berhasil ditolak.");
+        }catch(\Exception $e){
+            Flux::toast("Gagal menolak kandidat: " . $e->getMessage(), variant: "danger");
+        }
+    }
 };
 ?>
 
 <div class="flex flex-1 flex-col gap-6">
     <livewire:bread-crumbs/>
-
     @php $result = $this->result(); @endphp
-
     @if(is_string($result))
         <div class="flex flex-col items-center justify-center p-12 bg-white dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm text-center">
             <div class="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-full mb-4">
@@ -63,9 +175,7 @@ new #[Layout('layouts::hr', [
                 Kembali
             </flux:button>
         </div>
-
         <flux:separator/>
-
         {{-- Info Umum --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/50 px-5 py-4 flex flex-col gap-1">
@@ -87,7 +197,6 @@ new #[Layout('layouts::hr', [
                 <span class="font-mono font-medium text-zinc-800 dark:text-zinc-200">{{ $result['Pi'] }}</span>
             </div>
         </div>
-
         {{-- Info Kriteria --}}
         <div class="flex flex-col gap-3">
             <h2 class="text-xs font-semibold uppercase tracking-wide text-zinc-400 flex items-center gap-2">
@@ -120,14 +229,12 @@ new #[Layout('layouts::hr', [
                 @endforeach
             </div>
         </div>
-
         {{-- Tabel Ranking --}}
         <div class="flex flex-col gap-3">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
                 <flux:icon name="trophy" class="size-4"/>
                 Peringkat Kandidat
             </h2>
-
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>Peringkat</flux:table.column>
@@ -136,12 +243,11 @@ new #[Layout('layouts::hr', [
                         <flux:table.column>{{ $criteriaName }}</flux:table.column>
                     @endforeach
                     <flux:table.column>Total Qi</flux:table.column>
+                    <flux:table.column>Aksi</flux:table.column>
                 </flux:table.columns>
-
                 <flux:table.rows>
                     @foreach($result['ranking'] as $row)
                         <flux:table.row :key="$row['rank']">
-
                             {{-- Peringkat dengan warna medal --}}
                             <flux:table.cell>
                                 @if($row['rank'] === 1)
@@ -154,14 +260,12 @@ new #[Layout('layouts::hr', [
                                     <flux:badge color="zinc" size="sm">Ke-{{ $row['rank'] }}</flux:badge>
                                 @endif
                             </flux:table.cell>
-
                             {{-- Nama kandidat --}}
                             <flux:table.cell>
                                 <span class="font-medium {{ $row['rank'] === 1 ? 'text-amber-600 dark:text-amber-400' : '' }}">
                                     {{ $row['candidate_name'] }}
                                 </span>
                             </flux:table.cell>
-
                             {{-- Gap per kriteria --}}
                             @foreach($row['gap_details'] as $gap)
                                 <flux:table.cell>
@@ -170,24 +274,40 @@ new #[Layout('layouts::hr', [
                                     </span>
                                 </flux:table.cell>
                             @endforeach
-
                             {{-- Total Qi --}}
                             <flux:table.cell>
                                 <span class="font-mono font-semibold {{ $row['rank'] === 1 ? 'text-green-600 dark:text-green-400' : 'text-zinc-700 dark:text-zinc-300' }}">
                                     {{ number_format($row['qi_score'], 6) }}
                                 </span>
                             </flux:table.cell>
-
+                            {{-- Aksi (Tombol Terima / Tolak) --}}
+                            <flux:table.cell>
+                                @php
+                                    $appModel = \App\Models\Application::find($row['application_id']);
+                                    $decisionStatus = $appModel?->status;
+                                @endphp
+                                @if($decisionStatus === 'hired')
+                                    <flux:badge color="green">Diterima</flux:badge>
+                                @elseif($decisionStatus === 'rejected')
+                                    <flux:badge color="red">Ditolak</flux:badge>
+                                @else
+                                    <div class="flex gap-2">
+                                        <flux:button size="xs" color="green" class="cursor-pointer" wire:click="decideHired({{ $row['application_id'] }})" wire:confirm="Terima kandidat ini dan masukkan langsung sebagai karyawan baru (Employee)?">
+                                            Terima
+                                        </flux:button>
+                                        <flux:button size="xs" color="red" class="cursor-pointer" wire:click="decideRejected({{ $row['application_id'] }})" wire:confirm="Tolak kandidat ini?">
+                                            Tolak
+                                        </flux:button>
+                                    </div>
+                                @endif
+                            </flux:table.cell>
                         </flux:table.row>
                     @endforeach
                 </flux:table.rows>
             </flux:table>
-
             <p class="text-xs text-zinc-400 dark:text-zinc-500">
                 * Nilai Qi (Total Gap) yang lebih kecil menunjukkan kandidat yang lebih baik.
             </p>
         </div>
     @endif
-</div>
-
 </div>

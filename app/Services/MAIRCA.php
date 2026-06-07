@@ -96,11 +96,11 @@ class MAIRCA
         }
 
         // ambil semua application yang sudah selesai interview
-        $applications = Application::where("vacancy_id", $vacancyId)->where("status", "interview_done")->with(["candidate", "interviewSessions.scores"])->get();
+        $applications = Application::where("vacancy_id", $vacancyId)->whereIn("status", ["interview_done", "hired", "rejected"])->with(["candidate", "interviewSessions.scores"])->get();
 
         // validasi
         if ($applications->isEmpty()) {
-            throw new \RuntimeException("Belum ada kandidat dengan status interview_done.");
+            throw new \RuntimeException("Belum ada kandidat dengan status interview_done, hired, atau rejected.");
         }
 
         // perhitungan MAIRCA
