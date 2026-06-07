@@ -2,36 +2,24 @@
 
 namespace Database\Seeders;
 
+use App\Models\Department;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DepartmentSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $departments = [
-            ['department_name' => 'Human Resources',        'is_active' => true],
-            ['department_name' => 'Finance & Accounting',   'is_active' => true],
-            ['department_name' => 'Information Technology', 'is_active' => true],
-            ['department_name' => 'Marketing',              'is_active' => true],
-            ['department_name' => 'Operations',             'is_active' => true],
-            ['department_name' => 'Research & Development', 'is_active' => true],
-            ['department_name' => 'Customer Service',       'is_active' => true],
-            ['department_name' => 'Legal & Compliance',     'is_active' => false],
-            ['department_name' => 'Procurement',            'is_active' => true],
-            ['department_name' => 'General Affairs',        'is_active' => false],
+            ['department_name' => 'Teknologi Informasi', 'is_active' => true],
+            ['department_name' => 'Human Resources',     'is_active' => true],
+            ['department_name' => 'Keuangan',            'is_active' => true],
+            ['department_name' => 'Operasional',         'is_active' => true],
         ];
 
         foreach ($departments as $dept) {
-            DB::table('departments')->updateOrInsert(
+            Department::firstOrCreate(
                 ['department_name' => $dept['department_name']],
-                array_merge($dept, [
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ])
+                $dept
             );
         }
     }

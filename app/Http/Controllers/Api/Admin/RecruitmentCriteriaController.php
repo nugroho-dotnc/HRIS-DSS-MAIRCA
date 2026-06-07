@@ -52,6 +52,13 @@ class RecruitmentCriteriaController extends Controller
         $grouped = $criteria->groupBy('position_id')->map(function ($group) {
             return $group->sum('weight');
         });
+        if ($criteria->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

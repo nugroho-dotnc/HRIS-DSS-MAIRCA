@@ -61,6 +61,13 @@ class VacancyController extends Controller
 
         $vacancies = $query->orderByDesc('created_at')
             ->paginate($request->get('per_page', 10));
+        if ($vacancies->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

@@ -10,64 +10,32 @@ class PositionSeeder extends Seeder
 {
     public function run(): void
     {
+        $ti  = Department::where('department_name', 'Teknologi Informasi')->first()->id;
+        $hr  = Department::where('department_name', 'Human Resources')->first()->id;
+        $fin = Department::where('department_name', 'Keuangan')->first()->id;
+        $ops = Department::where('department_name', 'Operasional')->first()->id;
+
         $positions = [
-            'Human Resources' => [
-                'HR Manager',
-                'Recruiter',
-                'Training & Development Specialist',
-            ],
-            'Finance & Accounting' => [
-                'Financial Analyst',
-                'Akuntan',
-                'Auditor Internal',
-            ],
-            'Information Technology' => [
-                'Software Engineer',
-                'Backend Developer',
-                'Frontend Developer',
-                'QA Engineer',
-                'DevOps Engineer',
-            ],
-            'Marketing' => [
-                'Marketing Manager',
-                'Content Creator',
-                'SEO Specialist',
-                'Brand Strategist',
-            ],
-            'Operations' => [
-                'Operations Manager',
-                'Supervisor Produksi',
-                'Logistics Coordinator',
-            ],
-            'Research & Development' => [
-                'R&D Analyst',
-                'Product Designer',
-            ],
-            'Customer Service' => [
-                'Customer Service Representative',
-                'Team Lead CS',
-            ],
-            'Procurement' => [
-                'Procurement Officer',
-                'Purchasing Staff',
-            ],
+            // Teknologi Informasi
+            ['department_id' => $ti,  'position_name' => 'Backend Developer',   'is_active' => true],
+            ['department_id' => $ti,  'position_name' => 'Frontend Developer',  'is_active' => true],
+            ['department_id' => $ti,  'position_name' => 'DevOps Engineer',     'is_active' => true],
+            // Human Resources
+            ['department_id' => $hr,  'position_name' => 'HR Specialist',       'is_active' => true],
+            ['department_id' => $hr,  'position_name' => 'Recruitment Officer',  'is_active' => true],
+            // Keuangan
+            ['department_id' => $fin, 'position_name' => 'Akuntan',             'is_active' => true],
+            ['department_id' => $fin, 'position_name' => 'Financial Analyst',   'is_active' => true],
+            // Operasional
+            ['department_id' => $ops, 'position_name' => 'Operations Manager',  'is_active' => true],
+            ['department_id' => $ops, 'position_name' => 'Logistics Staff',     'is_active' => true],
         ];
 
-        foreach ($positions as $departmentName => $positionNames) {
-            $department = Department::firstOrCreate(
-                ['department_name' => $departmentName],
-                ['is_active' => true]
+        foreach ($positions as $pos) {
+            Position::firstOrCreate(
+                ['department_id' => $pos['department_id'], 'position_name' => $pos['position_name']],
+                $pos
             );
-
-            foreach ($positionNames as $positionName) {
-                Position::firstOrCreate(
-                    [
-                        'department_id' => $department->id,
-                        'position_name' => $positionName,
-                    ],
-                    ['is_active' => true]
-                );
-            }
         }
     }
 }

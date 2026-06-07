@@ -54,6 +54,13 @@ class DepartmentController extends Controller
         }
 
         $departments = $query->orderBy('department_name')->get();
+        if ($departments->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

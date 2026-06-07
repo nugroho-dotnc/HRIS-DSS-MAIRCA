@@ -66,6 +66,13 @@ class InterviewController extends Controller
 
         $sessions = $query->orderBy('interview_date', 'desc')
             ->paginate($request->get('per_page', 15));
+        if ($interviews->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

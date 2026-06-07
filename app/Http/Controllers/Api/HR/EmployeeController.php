@@ -73,6 +73,13 @@ class EmployeeController extends Controller
 
         $employees = $query->orderBy('created_at', 'desc')
             ->paginate($request->get('per_page', 15));
+        if ($employees->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

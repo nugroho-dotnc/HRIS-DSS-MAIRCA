@@ -2,60 +2,106 @@
 
 namespace Database\Seeders;
 
+use App\Models\Application;
+use App\Models\Candidate;
+use App\Models\Vacancies;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ApplicationSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Ambil semua kandidat dan lowongan yang ada
-        $candidates = DB::table('candidates')->pluck('id', 'email');
-        $vacancies  = DB::table('vacancies')->pluck('id', 'title');
+        // Resolve IDs secara dinamis
+        $vacancy1 = Vacancies::where('title', 'Backend Developer – Laravel')->first()->id;
+        $vacancy2 = Vacancies::where('title', 'HR Specialist')->first()->id;
+        $vacancy3 = Vacancies::where('title', 'Frontend Developer React')->first()->id;
 
-        if ($candidates->isEmpty() || $vacancies->isEmpty()) {
-            $this->command->warn('Candidates or vacancies not found. Run CandidateSeeder and VacancySeeder first.');
-            return;
-        }
+        $candidate1 = Candidate::where('email', 'ahmad.fauzan@gmail.com')->first()->id;
+        $candidate2 = Candidate::where('email', 'siti.nurhaliza@gmail.com')->first()->id;
+        $candidate3 = Candidate::where('email', 'rizky.pratama@gmail.com')->first()->id;
+        $candidate4 = Candidate::where('email', 'dewi.anggraini@gmail.com')->first()->id;
+        $candidate5 = Candidate::where('email', 'muhammad.ilham@gmail.com')->first()->id;
 
-        // Mapping kandidat → lowongan yang dilamar
         $applications = [
-            ['candidate_email' => 'ahmad.fauzi@gmail.com',      'vacancy_title' => 'Lowongan Software Engineer – IT Division',              'status' => 'interview_done',      'code' => 'APP-2026-0001'],
-            ['candidate_email' => 'bagas.prasetyo@gmail.com',    'vacancy_title' => 'Lowongan Backend Developer – Divisi IT',                'status' => 'interview_done',      'code' => 'APP-2026-0002'],
-            ['candidate_email' => 'putri.handayani@gmail.com',   'vacancy_title' => 'Lowongan Frontend Developer – Divisi IT',              'status' => 'interview_scheduled', 'code' => 'APP-2026-0003'],
-            ['candidate_email' => 'rizal.maulana@gmail.com',     'vacancy_title' => 'Lowongan Software Engineer – IT Division',              'status' => 'screening',           'code' => 'APP-2026-0004'],
-            ['candidate_email' => 'dewi.lestari@gmail.com',      'vacancy_title' => 'Lowongan Recruiter – Divisi Human Resources',          'status' => 'interview_done',      'code' => 'APP-2026-0005'],
-            ['candidate_email' => 'hendra.kusuma@gmail.com',     'vacancy_title' => 'Lowongan Financial Analyst – Divisi Finance',          'status' => 'hired',               'code' => 'APP-2026-0006'],
-            ['candidate_email' => 'siti.aminah@gmail.com',       'vacancy_title' => 'Lowongan Customer Service Representative',             'status' => 'applied',             'code' => 'APP-2026-0007'],
-            ['candidate_email' => 'nurul.fadhilah@gmail.com',    'vacancy_title' => 'Lowongan Marketing Manager – Divisi Marketing',        'status' => 'interview_done',      'code' => 'APP-2026-0008'],
-            ['candidate_email' => 'irfan.hakim@gmail.com',       'vacancy_title' => 'Lowongan Procurement Officer – Divisi Pengadaan',      'status' => 'screening',           'code' => 'APP-2026-0009'],
-            ['candidate_email' => 'laila.rahmasari@gmail.com',   'vacancy_title' => 'Lowongan R&D Analyst – Divisi Riset & Pengembangan',   'status' => 'applied',             'code' => 'APP-2026-0010'],
+            // ── Lowongan 1 (Backend Dev – closed, sudah selesai proses) ──
+
+            // Ahmad melamar Backend → HIRED (kandidat terpilih)
+            [
+                'candidate_id'     => $candidate1,
+                'vacancy_id'       => $vacancy1,
+                'status'           => 'hired',
+                'application_code' => 'APP-2026-00001',
+                'created_at'       => Carbon::now()->subDays(45),
+                'updated_at'       => Carbon::now()->subDays(30),
+            ],
+            // Rizky melamar Backend → REJECTED (tidak lolos)
+            [
+                'candidate_id'     => $candidate3,
+                'vacancy_id'       => $vacancy1,
+                'status'           => 'rejected',
+                'application_code' => 'APP-2026-00002',
+                'created_at'       => Carbon::now()->subDays(44),
+                'updated_at'       => Carbon::now()->subDays(30),
+            ],
+
+            // ── Lowongan 2 (HR Specialist – open, sedang proses) ────────
+
+            // Siti melamar HR Spec → INTERVIEW_DONE (sudah selesai wawancara, menunggu DSS)
+            [
+                'candidate_id'     => $candidate2,
+                'vacancy_id'       => $vacancy2,
+                'status'           => 'interview_done',
+                'application_code' => 'APP-2026-00003',
+                'created_at'       => Carbon::now()->subDays(10),
+                'updated_at'       => Carbon::now()->subDays(3),
+            ],
+            // Dewi melamar HR Spec → INTERVIEW_SCHEDULED (akan diwawancarai)
+            [
+                'candidate_id'     => $candidate4,
+                'vacancy_id'       => $vacancy2,
+                'status'           => 'interview_scheduled',
+                'application_code' => 'APP-2026-00004',
+                'created_at'       => Carbon::now()->subDays(8),
+                'updated_at'       => Carbon::now()->subDays(2),
+            ],
+            // Ilham juga melamar HR Spec → SCREENING (masih tahap review CV)
+            [
+                'candidate_id'     => $candidate5,
+                'vacancy_id'       => $vacancy2,
+                'status'           => 'screening',
+                'application_code' => 'APP-2026-00005',
+                'created_at'       => Carbon::now()->subDays(5),
+                'updated_at'       => Carbon::now()->subDays(4),
+            ],
+
+            // ── Lowongan 3 (Frontend React – open, baru dibuka) ────────
+
+            // Ilham melamar Frontend → APPLIED (baru masuk)
+            [
+                'candidate_id'     => $candidate5,
+                'vacancy_id'       => $vacancy3,
+                'status'           => 'applied',
+                'application_code' => 'APP-2026-00006',
+                'created_at'       => Carbon::now()->subDays(2),
+                'updated_at'       => Carbon::now()->subDays(2),
+            ],
+            // Rizky melamar Frontend → APPLIED (baru masuk)
+            [
+                'candidate_id'     => $candidate3,
+                'vacancy_id'       => $vacancy3,
+                'status'           => 'applied',
+                'application_code' => 'APP-2026-00007',
+                'created_at'       => Carbon::now()->subDays(1),
+                'updated_at'       => Carbon::now()->subDays(1),
+            ],
         ];
 
-        foreach ($applications as $app) {
-            $candidateId = $candidates[$app['candidate_email']] ?? null;
-            $vacancyId   = $vacancies[$app['vacancy_title']]   ?? null;
-
-            if (! $candidateId || ! $vacancyId) continue;
-
-            $exists = DB::table('applications')
-                ->where('candidate_id', $candidateId)
-                ->where('vacancy_id', $vacancyId)
-                ->exists();
-
-            if (! $exists) {
-                DB::table('applications')->insert([
-                    'candidate_id'     => $candidateId,
-                    'vacancy_id'       => $vacancyId,
-                    'status'           => $app['status'],
-                    'application_code' => $app['code'],
-                    'created_at'       => now(),
-                    'updated_at'       => now(),
-                ]);
-            }
+        foreach ($applications as $appData) {
+            Application::firstOrCreate(
+                ['application_code' => $appData['application_code']],
+                $appData
+            );
         }
     }
 }

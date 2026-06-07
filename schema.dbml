@@ -1,158 +1,287 @@
-// ============================================
-// HRIS + DSS SYSTEM — dbdiagram.io schema
-// ============================================
+// ============================================================
+// HRIS + DSS (MAIRCA) SYSTEM — Full Database Schema
+// Generated from Laravel Migrations
+// Paste this into https://dbdiagram.io/d
+// ============================================================
 
-// ─── CORE ────────────────────────────────────
-
-
+// ─── CORE: AUTHENTICATION & SESSION ─────────────────────────
 
 Table users {
-  id int [pk, increment]
+  id bigint [pk, increment]
   name varchar [not null]
   email varchar [unique, not null]
+  email_verified_at timestamp [null]
   password varchar [not null]
-  role enum('admin', 'hr', 'employee', 'supervisor', 'candidate') [default: 'candidate']
-  status enum('active', 'inactive') [default: 'active']
-  created_at timestamp [default: `now()`]
+  two_factor_secret text [null]
+  two_factor_recovery_codes text [null]
+  two_factor_confirmed_at timestamp [null]
+  remember_token varchar(100) [null]
+  role enum('admin', 'hr', 'supervisor', 'candidate', 'employee') [not null]
+  is_active boolean [default: true]
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
+Table password_reset_tokens {
+  email varchar [pk]
+  token varchar [not null]
+  created_at timestamp [null]
+}
+
+Table sessions {
+  id varchar [pk]
+  user_id bigint [null, ref: > users.id]
+  ip_address varchar(45) [null]
+  user_agent text [null]
+  payload longtext [not null]
+  last_activity int [not null]
+
+  indexes {
+    user_id
+    last_activity
+  }
+}
+
+Table personal_access_tokens {
+  id bigint [pk, increment]
+  tokenable_type varchar [not null]
+  tokenable_id bigint [not null]
+  name text [not null]
+  token varchar(64) [unique, not null]
+  abilities text [null]
+  last_used_at timestamp [null]
+  expires_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+
+  indexes {
+    (tokenable_type, tokenable_id)
+    expires_at
+  }
+}
+
+// ─── CORE: ORGANISASI ───────────────────────────────────────
+
 Table departments {
-  id int [pk, increment]
-  department_name varchar [not null]
+  id bigint [pk, increment]
+  department_name varchar [unique, not null]
+  is_active boolean [default: true]
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
 Table positions {
-  id int [pk, increment]
-  department_id int [ref: > departments.id, not null]
+  id bigint [pk, increment]
+  department_id bigint [not null, ref: > departments.id]
   position_name varchar [not null]
+  is_active boolean [default: true]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+
+  indexes {
+    (department_id, position_name) [unique]
+  }
 }
 
-// ─── DSS CRITERIA ────────────────────────────
+// ─── DSS: KRITERIA REKRUTMEN + SKALA LIKERT ─────────────────
 
-Table dss_criteria {
-  id int [pk, increment]
-  position_id int [ref: > positions.id, not null]
+Table recruitment_criterias {
+  id bigint [pk, increment]
+  position_id bigint [not null, ref: > positions.id]
   name varchar [not null]
   weight decimal [not null, note: '0.00 - 1.00, total per position_id harus = 1']
-  type enum('benefit', 'cost') [default: 'benefit']
-  context enum('recruitment', 'best_employee') [default: 'recruitment']
-  created_at timestamp [default: `now()`]
+  description text [null]
+  type enum('benefit', 'cost') [not null]
+  data_type enum('kualitatif', 'kuantitatif') [default: 'kuantitatif']
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
-// ─── RECRUITMENT MODULE ───────────────────────
+Table likert_scales {
+  id bigint [pk, increment]
+  recruitment_criterias_id bigint [not null, ref: > recruitment_criterias.id]
+  label varchar [not null, note: 'Label deskriptif, misal: Sangat Baik, Baik, Cukup']
+  value decimal [not null, note: 'Nilai numerik dari label, misal: 5, 4, 3']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+// ─── RECRUITMENT MODULE ─────────────────────────────────────
 
 Table vacancies {
-  id int [pk, increment]
-  hr_id int [ref: > users.id, not null]
-  position_id int [ref: > positions.id, not null]
+  id bigint [pk, increment]
+  hr_id bigint [not null, ref: > users.id, note: 'User dengan role HR yang membuat lowongan']
+  position_id bigint [not null, ref: > positions.id]
   title varchar [not null]
-  description text
-  requirements text
-  deadline date
+  description text [not null]
+  requirements text [not null]
+  deadline date [not null]
   status enum('open', 'closed') [default: 'open']
-  created_at timestamp [default: `now()`]
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
 Table candidates {
-  id int [pk, increment]
-  name varchar
-  email varchar
-  phone varchar
-  gender varchar
-  city varchar
-  zip_code varchar
-  cv_path varchar
-  portfolio_path varchar
-  experience text
+  id bigint [pk, increment]
+  name varchar [not null]
+  email varchar [not null]
+  phone varchar [not null]
+  gender enum('L', 'P') [not null]
+  city varchar [not null]
+  zip_code varchar [not null]
+  cv_path varchar [null]
+  portofolio_path varchar [null]
+  web_portofolio_url varchar [null]
+  complete_address text [not null]
+  experience text [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
 Table applications {
-  id int [pk, increment]
-  candidate_id int [ref: > candidates.id, not null]
-  vacancy_id int [ref: > vacancies.id, not null]
+  id bigint [pk, increment]
+  candidate_id bigint [not null, ref: > candidates.id]
+  vacancy_id bigint [not null, ref: > vacancies.id]
   status enum('applied', 'screening', 'interview_scheduled', 'interview_done', 'hired', 'rejected') [default: 'applied']
-  applied_at timestamp [default: `now()`]
+  application_code varchar [unique, not null, note: 'Kode unik lamaran, contoh: APP-2026-00001']
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
 Table interview_sessions {
-  id int [pk, increment]
-  application_id int [ref: > applications.id, not null]
-  interviewer_id int [ref: > users.id, not null]
-  interview_date datetime
-  notes text
+  id bigint [pk, increment]
+  application_id bigint [not null, ref: > applications.id]
+  interviewer_id bigint [not null, ref: > users.id, note: 'HR atau Supervisor sebagai interviewer']
+  interview_date datetime [not null]
+  notes text [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
 Table interview_scores {
-  id int [pk, increment]
-  session_id int [ref: > interview_sessions.id, not null]
-  criteria_id int [ref: > dss_criteria.id, not null]
-  score decimal [not null, note: '0 - 100']
+  id bigint [pk, increment]
+  session_id bigint [not null, ref: > interview_sessions.id]
+  criteria_id bigint [not null, ref: > recruitment_criterias.id]
+  score decimal [not null, note: 'Skor 0 - 100 atau sesuai skala likert']
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
 Table recruitment_results {
-  id int [pk, increment]
-  application_id int [ref: > applications.id, not null]
-  final_score decimal
-  ranking int
-  decision enum('hired', 'rejected')
-  calculated_at timestamp [default: `now()`]
+  id bigint [pk, increment]
+  application_id bigint [not null, ref: > applications.id]
+  final_score decimal [not null, note: 'Skor akhir dari perhitungan MAIRCA']
+  ranking decimal [not null]
+  decission enum('rejected', 'hired') [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
-// ─── EMPLOYEE MODULE ──────────────────────────
+// ─── EMPLOYEE MODULE ────────────────────────────────────────
 
 Table employees {
-  id int [pk, increment]
-  user_id int [ref: > users.id, not null]
-  department_id int [ref: > departments.id, not null]
-  position_id int [ref: > positions.id, not null]
-  supervisor_id int [ref: > employees.id, note: 'self-referencing']
-  join_date date
-  contract_status enum('permanent', 'contract', 'probation') [default: 'probation']
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id]
+  department_id bigint [not null, ref: > departments.id]
+  position_id bigint [not null, ref: > positions.id]
+  supervisor_id bigint [not null, ref: > employees.id, note: 'Self-referencing ke supervisor']
+  join_date date [not null]
+  contract_status enum('permanent', 'contract', 'probation') [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
-Table attendance {
-  id int [pk, increment]
-  employee_id int [ref: > employees.id, not null]
-  date date [not null]
-  check_in time
-  check_out time
-  status enum('present', 'late', 'absent', 'leave') [default: 'present']
+// ─── NOTIFICATION MODULE (FCM) ──────────────────────────────
+
+Table fcm_tokens {
+  id bigint [pk, increment]
+  owner_type enum('hr', 'candidate') [not null]
+  owner_id bigint [not null, note: 'user_id untuk HR, application_id untuk candidate']
+  fcm_token varchar(512) [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+
+  indexes {
+    (owner_type, owner_id, fcm_token) [unique, name: 'fcm_tokens_unique']
+    (owner_type, owner_id)
+  }
 }
 
-Table leaves {
-  id int [pk, increment]
-  employee_id int [ref: > employees.id, not null]
-  leave_type enum('sick', 'annual', 'emergency') [not null]
-  start_date date [not null]
-  end_date date [not null]
-  reason text
-  approval_status enum('pending', 'approved', 'rejected') [default: 'pending']
-  approved_by int [ref: > users.id]
-  created_at timestamp [default: `now()`]
+Table notifications {
+  id bigint [pk, increment]
+  type enum('new_application', 'dss_completed') [not null]
+  title varchar [not null]
+  body text [not null]
+  data json [null, note: 'Payload tambahan: application_code, vacancy_id, dll']
+  recipient_type enum('hr', 'candidate') [not null]
+  recipient_id bigint [not null, note: 'user_id untuk HR, application_id untuk candidate']
+  is_read boolean [default: false]
+  sent_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+
+  indexes {
+    (recipient_type, recipient_id)
+    type
+    is_read
+  }
 }
 
-// ─── DSS BEST EMPLOYEE (phase 2) ─────────────
+// ─── LARAVEL INFRASTRUCTURE ─────────────────────────────────
 
-Table kpi_evaluations {
-  id int [pk, increment]
-  employee_id int [ref: > employees.id, not null]
-  supervisor_id int [ref: > users.id, not null]
-  month int [not null, note: '1 - 12']
-  year int [not null]
-  productivity_score decimal [note: 'input manual supervisor, 0 - 100']
-  discipline_score decimal [note: 'input manual supervisor, 0 - 100']
-  attendance_rate decimal [note: 'kalkulasi otomatis dari tabel attendance']
-  punctuality_rate decimal [note: 'kalkulasi otomatis dari tabel attendance']
-  created_at timestamp [default: `now()`]
+Table cache {
+  key varchar [pk]
+  value mediumtext [not null]
+  expiration bigint [not null]
+
+  indexes {
+    expiration
+  }
 }
 
-Table best_employee_results {
-  id int [pk, increment]
-  employee_id int [ref: > employees.id, not null]
-  month int [not null]
-  year int [not null]
-  final_score decimal
-  ranking int
-  is_best_employee boolean [default: false]
-  calculated_at timestamp [default: `now()`]
+Table cache_locks {
+  key varchar [pk]
+  owner varchar [not null]
+  expiration bigint [not null]
+
+  indexes {
+    expiration
+  }
+}
+
+Table jobs {
+  id bigint [pk, increment]
+  queue varchar [not null]
+  payload longtext [not null]
+  attempts tinyint [not null]
+  reserved_at int [null]
+  available_at int [not null]
+  created_at int [not null]
+
+  indexes {
+    queue
+  }
+}
+
+Table job_batches {
+  id varchar [pk]
+  name varchar [not null]
+  total_jobs int [not null]
+  pending_jobs int [not null]
+  failed_jobs int [not null]
+  failed_job_ids longtext [not null]
+  options mediumtext [null]
+  cancelled_at int [null]
+  created_at int [not null]
+  finished_at int [null]
+}
+
+Table failed_jobs {
+  id bigint [pk, increment]
+  uuid varchar [unique, not null]
+  connection text [not null]
+  queue text [not null]
+  payload longtext [not null]
+  exception longtext [not null]
+  failed_at timestamp [default: `now()`]
 }
