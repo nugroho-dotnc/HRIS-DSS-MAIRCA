@@ -388,15 +388,18 @@ class InterviewController extends Controller
         $request->validate([
             'scores' => 'required|array|min:1',
             'scores.*.criteria_id' => 'required|exists:recruitment_criterias,id',
-            'scores.*.score' => 'required|numeric|min:0|max:100',
+            'scores.*.score' => 'required|numeric|min:0',
         ]);
 
         $application = $session->application;
+        $criterias = $application->vacancy->position->recruitment_criteria->keyBy("id");
         $validCriteriaIds = $application->vacancy->position->recruitment_criteria->pluck('id')->toArray();
 
         $saved = [];
 
         foreach ($request->scores as $scoreData) {
+            $criteriaId = $scoreData["criteria_id"];
+
             // Validasi: kriteria harus milik posisi vacancy ini
             if (!in_array($scoreData['criteria_id'], $validCriteriaIds)) {
                 return response()->json([
@@ -406,14 +409,40 @@ class InterviewController extends Controller
                 ], 422);
             }
 
+            $criteria = $criterias->get($criteriaId);
+            $scoreVal = $scoreData["score"];
+
+            // validasi untuk tipe data kuantitatif
+            if ($criteria->data_type === "kuantitatif") {
+                $nameLower = strtolower($criteria->name);
+                $isIpk = str_contains($nameLower, "ipk");
+                $isGaji = str_contains($nameLower, "gaji");
+
+                if ($isIpk && $scoreVal > 4) {
+                    return response()->json([
+                        "success" => false,
+                        "message" => "Kriteria '{$criteria->name}' (IPK) tidak boleh melebihi 4.00.",
+                        "data" => null,
+                    ], 422);
+                }
+
+                if (!$isIpk && !$isGaji && $scoreVal > 100) {
+                    return response()->json([
+                        "success" => false,
+                        "message" => "Kriteria '{$criteria->name}' tidak boleh melebihi 100.",
+                        "data" => null
+                    ], 422);
+                }
+            }
+
             // Upsert: update jika sudah ada, insert jika belum
             $score = InterviewScore::updateOrCreate(
                 [
                     'session_id' => $id,
-                    'criteria_id' => $scoreData['criteria_id'],
+                    'criteria_id' => $criteriaId,
                 ],
                 [
-                    'score' => $scoreData['score'],
+                    'score' => $scoreVal,
                 ]
             );
 

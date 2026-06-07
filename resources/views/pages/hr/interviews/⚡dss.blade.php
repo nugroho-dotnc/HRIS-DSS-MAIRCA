@@ -67,6 +67,11 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
         return str_contains(strtolower($name), 'ipk');
     }
 
+    // deteksi apakah kriteria ini adalah gaji berdasarkan nama
+    private function isGaji(string $name): bool{
+        return str_contains(strtolower($name), "gaji");
+    }
+
     /** Build aturan validasi dinamis berdasarkan daftar kriteria. */
     private function buildRules(): array
     {
@@ -74,8 +79,12 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
         foreach ($this->criterias() as $criteria) {
             $key = "scores.{$criteria->id}";
             if ($criteria->data_type === 'kuantitatif') {
-                $max = $this->isIpk($criteria->name) ? 4 : 100;
-                $rules[$key] = "required|numeric|min:0|max:{$max}";
+                if($this->isGaji($criteria->name)){
+                    $rules[$key] = "required|numeric|min:0";
+                }else{
+                    $max = $this->isIpk($criteria->name) ? 4 : 100;
+                    $rules[$key] = "required|numeric|min:0|max:{$max}";
+                }
             } else {
                 $rules[$key] = 'required';
             }
@@ -91,6 +100,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
             $key  = "scores.{$criteria->id}";
             $name = $criteria->name;
             $isIpk = $this->isIpk($name);
+            $isGaji = $this->isGaji($name);
             $max   = $isIpk ? '4.00' : '100';
 
             $messages["{$key}.required"] = "Kriteria '{$name}' belum diisi.";
@@ -98,9 +108,12 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
             $messages["{$key}.min"]      = $isIpk
                 ? "IPK tidak boleh kurang dari 0.00."
                 : "'{$name}' tidak boleh kurang dari 0.";
-            $messages["{$key}.max"]      = $isIpk
-                ? "IPK tidak boleh melebihi 4.00."
-                : "'{$name}' tidak boleh melebihi {$max}.";
+            if (!$isGaji) {
+                $messages["{$key}.max"]      = $isIpk
+                    ? "IPK tidak boleh melebihi 4.00."
+                    : "'{$name}' tidak boleh melebihi {$max}.";
+            }
+            
         }
         return $messages;
     }
@@ -243,21 +256,44 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
                             {{-- Input angka kuantitatif --}}
                             @php
                                 $isIpk  = str_contains(strtolower($criteria->name), 'ipk');
-                                $maxVal = $isIpk ? 4 : 100;
+                                $isGaji = str_contains(strtolower($criteria->name), 'gaji');
+                                $maxVal = $isIpk ? 4 : ($isGaji ? null : 100);
                                 $stepVal = $isIpk ? '0.01' : '1';
+                                
+                                if ($isIpk) {
+                                    $placeholder = '0.00 – 4.00';
+                                    $helpText = 'Rentang: 0.00 – 4.00';
+                                } elseif ($isGaji) {
+                                    $placeholder = 'Minimal 0';
+                                    $helpText = 'Minimal 0 (tidak ada batas maksimum)';
+                                } else {
+                                    $placeholder = '0 – 100';
+                                    $helpText = 'Rentang: 0 – 100';
+                                }
                             @endphp
-                            <flux:input
-                                wire:model.blur="scores.{{ $criteria->id }}"
-                                type="number"
-                                step="{{ $stepVal }}"
-                                min="0"
-                                max="{{ $maxVal }}"
-                                placeholder="{{ $isIpk ? '0.00 – 4.00' : '0 – 100' }}"
-                                size="sm"
-                            />
+                            @if($maxVal !== null)
+                                <flux:input
+                                    wire:model.blur="scores.{{ $criteria->id }}"
+                                    type="number"
+                                    step="{{ $stepVal }}"
+                                    min="0"
+                                    max="{{ $maxVal }}"
+                                    placeholder="{{ $placeholder }}"
+                                    size="sm"
+                                />
+                            @else
+                                <flux:input
+                                    wire:model.blur="scores.{{ $criteria->id }}"
+                                    type="number"
+                                    step="{{ $stepVal }}"
+                                    min="0"
+                                    placeholder="{{ $placeholder }}"
+                                    size="sm"
+                                />
+                            @endif
                             <flux:error name="scores.{{ $criteria->id }}" />
                             <span class="text-xs text-zinc-400">
-                                {{ $isIpk ? 'Rentang: 0.00 – 4.00' : 'Rentang: 0 – 100' }}
+                                {{ $helpText }}
                             </span>
                         @endif
                     </div>
