@@ -42,8 +42,8 @@ new class extends Component
 };
 ?>
 
-<div>
-    <flux:dropdown position="bottom" align="start">
+<div class="inline-flex items-center justify-center">
+    <flux:dropdown position="bottom" align="end">
         <flux:button variant="ghost" icon="bell" class="relative" square>
             @if($this->unreadCount > 0)
                 <span class="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">

@@ -44,9 +44,6 @@
                 <div class="flex-1">
                     <x-desktop-user-menu :name="auth()->user()->name" />
                 </div>
-                <div class="flex-none">
-                    <livewire:notification-bell />
-                </div>
             </div>
         </flux:sidebar>
 
