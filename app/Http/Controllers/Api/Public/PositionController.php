@@ -65,6 +65,13 @@ class PositionController extends Controller
         }
 
         $positions = $query->orderBy('position_name')->get();
+        if ($positions->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

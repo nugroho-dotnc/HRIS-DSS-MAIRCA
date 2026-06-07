@@ -31,7 +31,7 @@ class NotificationService
         $vacancyTitle  = $application->vacancy->title;
         $positionName  = $application->vacancy->position->position_name;
 
-        $title = '📋 Lamaran Baru';
+        $title = 'Lamaran Baru';
         $body  = "{$candidateName} melamar ke posisi {$positionName} — {$vacancyTitle}";
 
         $data = [

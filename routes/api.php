@@ -138,6 +138,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Likert Scale (nested under criteria)
         Route::get('/criteria/{id}/likert', [RecruitmentCriteriaController::class, 'likertIndex'])->name('criteria.likert.index');
         Route::post('/criteria/{id}/likert', [RecruitmentCriteriaController::class, 'likertStore'])->name('criteria.likert.store');
+        Route::put('/criteria/{id}/likert/{scaleId}', [RecruitmentCriteriaController::class, 'likertUpdate'])->name('criteria.likert.update');
         Route::delete('/criteria/{id}/likert/{scaleId}', [RecruitmentCriteriaController::class, 'likertDestroy'])->name('criteria.likert.destroy');
 
         // Reports (read-only)

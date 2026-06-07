@@ -52,6 +52,13 @@ class RecruitmentCriteriaController extends Controller
         $grouped = $criteria->groupBy('position_id')->map(function ($group) {
             return $group->sum('weight');
         });
+        if ($criteria->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -467,6 +474,65 @@ class RecruitmentCriteriaController extends Controller
             'message' => 'Skala Likert berhasil ditambahkan.',
             'data' => $scale,
         ], 201);
+    }
+
+    #[OA\Put(
+        path: '/admin/criteria/{id}/likert/{scaleId}',
+        summary: 'Update opsi skala Likert',
+        description: 'Memperbarui opsi skala Likert berdasarkan ID.',
+        security: [['sanctum' => []]],
+        tags: ['Admin - Criteria'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, description: 'ID kriteria', schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(name: 'scaleId', in: 'path', required: true, description: 'ID skala Likert', schema: new OA\Schema(type: 'integer'))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'label', type: 'string', example: 'Sangat Baik'),
+                    new OA\Property(property: 'value', type: 'number', example: 5.0)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Skala Likert berhasil diupdate',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Skala Likert berhasil diupdate.'),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/LikertScale')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Validasi gagal', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
+            new OA\Response(response: 404, description: 'Kriteria atau Skala Likert tidak ditemukan'),
+            new OA\Response(response: 500, description: 'Server Error')
+        ]
+    )]
+    public function likertUpdate(Request $request, string $id, string $scaleId): JsonResponse
+    {
+        $scale = LikertScale::where('recruitment_criterias_id', $id)
+            ->where('id', $scaleId)
+            ->firstOrFail();
+
+        $request->validate([
+            'label' => 'sometimes|required|string|max:255',
+            'value' => 'sometimes|required|numeric',
+        ]);
+
+        $scale->fill($request->only(['label', 'value']));
+        $scale->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Skala Likert berhasil diupdate.',
+            'data' => $scale,
+        ]);
     }
 
     #[OA\Delete(

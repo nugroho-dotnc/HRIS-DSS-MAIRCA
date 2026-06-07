@@ -68,6 +68,13 @@ class UserController extends Controller
         }
 
         $users = $query->orderBy('name')->paginate($request->get('per_page', 15));
+        if ($users->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

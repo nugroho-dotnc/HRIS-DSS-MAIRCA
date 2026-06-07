@@ -8,89 +8,115 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $users = [
-            // Admin
+            // ── Admin ────────────────────────────────────────
             [
-                'name'     => 'Administrator',
-                'email'    => 'admin@hris.com',
-                'password' => Hash::make('password'),
-                'role'     => 'admin',
+                'name'      => 'Super Admin',
+                'email'     => 'admin@hris.test',
+                'password'  => Hash::make('password'),
+                'role'      => 'admin',
+                'is_active' => true,
             ],
-            // HR
+
+            // ── HR ───────────────────────────────────────────
             [
-                'name'     => 'Sari Dewi',
-                'email'    => 'sari.dewi@hris.com',
-                'password' => Hash::make('password'),
-                'role'     => 'hr',
-            ],
-            [
-                'name'     => 'Budi Santoso',
-                'email'    => 'budi.santoso@hris.com',
-                'password' => Hash::make('password'),
-                'role'     => 'hr',
-            ],
-            // Supervisor
-            [
-                'name'     => 'Rina Agustina',
-                'email'    => 'rina.agustina@hris.com',
-                'password' => Hash::make('password'),
-                'role'     => 'supervisor',
+                'name'      => 'HR Manager',
+                'email'     => 'hr1@hris.test',
+                'password'  => Hash::make('password'),
+                'role'      => 'hr',
+                'is_active' => true,
             ],
             [
-                'name'     => 'Doni Pratama',
-                'email'    => 'doni.pratama@hris.com',
-                'password' => Hash::make('password'),
-                'role'     => 'supervisor',
+                'name'      => 'HR Staff',
+                'email'     => 'hr2@hris.test',
+                'password'  => Hash::make('password'),
+                'role'      => 'hr',
+                'is_active' => true,
             ],
-            // Employee
+
+            // ── Supervisor ───────────────────────────────────
             [
-                'name'     => 'Andi Wijaya',
-                'email'    => 'andi.wijaya@hris.com',
-                'password' => Hash::make('password'),
-                'role'     => 'employee',
-            ],
-            [
-                'name'     => 'Lestari Putri',
-                'email'    => 'lestari.putri@hris.com',
-                'password' => Hash::make('password'),
-                'role'     => 'employee',
+                'name'      => 'Supervisor Teknik',
+                'email'     => 'sup1@hris.test',
+                'password'  => Hash::make('password'),
+                'role'      => 'supervisor',
+                'is_active' => true,
             ],
             [
-                'name'     => 'Fajar Nugroho',
-                'email'    => 'fajar.nugroho@hris.com',
-                'password' => Hash::make('password'),
-                'role'     => 'employee',
+                'name'      => 'Supervisor HRD',
+                'email'     => 'sup2@hris.test',
+                'password'  => Hash::make('password'),
+                'role'      => 'supervisor',
+                'is_active' => true,
+            ],
+
+            // ── Candidate ────────────────────────────────────
+            [
+                'name'      => 'Ahmad Fauzan',
+                'email'     => 'candidate1@gmail.com',
+                'password'  => Hash::make('password'),
+                'role'      => 'candidate',
+                'is_active' => true,
             ],
             [
-                'name'     => 'Maya Sari',
-                'email'    => 'maya.sari@hris.com',
-                'password' => Hash::make('password'),
-                'role'     => 'employee',
-            ],
-            // Candidate
-            [
-                'name'     => 'Rizky Aditya',
-                'email'    => 'rizky.aditya@gmail.com',
-                'password' => Hash::make('password'),
-                'role'     => 'candidate',
+                'name'      => 'Siti Nurhaliza',
+                'email'     => 'candidate2@gmail.com',
+                'password'  => Hash::make('password'),
+                'role'      => 'candidate',
+                'is_active' => true,
             ],
             [
-                'name'     => 'Nita Rahayu',
-                'email'    => 'nita.rahayu@gmail.com',
-                'password' => Hash::make('password'),
-                'role'     => 'candidate',
+                'name'      => 'Rizky Pratama',
+                'email'     => 'candidate3@gmail.com',
+                'password'  => Hash::make('password'),
+                'role'      => 'candidate',
+                'is_active' => true,
+            ],
+            [
+                'name'      => 'Dewi Anggraini',
+                'email'     => 'candidate4@gmail.com',
+                'password'  => Hash::make('password'),
+                'role'      => 'candidate',
+                'is_active' => true,
+            ],
+            [
+                'name'      => 'Muhammad Ilham',
+                'email'     => 'candidate5@gmail.com',
+                'password'  => Hash::make('password'),
+                'role'      => 'candidate',
+                'is_active' => true,
+            ],
+
+            // ── Employee ─────────────────────────────────────
+            [
+                'name'      => 'Budi Setiawan',
+                'email'     => 'emp1@hris.test',
+                'password'  => Hash::make('password'),
+                'role'      => 'employee',
+                'is_active' => true,
+            ],
+            [
+                'name'      => 'Rina Marlina',
+                'email'     => 'emp2@hris.test',
+                'password'  => Hash::make('password'),
+                'role'      => 'employee',
+                'is_active' => true,
+            ],
+            [
+                'name'      => 'Hendro Wibowo',
+                'email'     => 'emp3@hris.test',
+                'password'  => Hash::make('password'),
+                'role'      => 'employee',
+                'is_active' => true,
             ],
         ];
 
-        foreach ($users as $user) {
+        foreach ($users as $userData) {
             User::firstOrCreate(
-                ['email' => $user['email']],
-                $user
+                ['email' => $userData['email']],
+                $userData
             );
         }
     }

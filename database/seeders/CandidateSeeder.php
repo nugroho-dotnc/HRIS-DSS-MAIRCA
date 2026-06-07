@@ -2,157 +2,95 @@
 
 namespace Database\Seeders;
 
+use App\Models\Candidate;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class CandidateSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $candidates = [
+            // Kandidat 1: Backend dev berpengalaman
             [
-                'name'             => 'Ahmad Fauzi',
-                'email'            => 'ahmad.fauzi@gmail.com',
-                'phone'            => '081234567890',
-                'gender'           => 'L',
-                'city'             => 'Jakarta',
-                'zip_code'         => '10110',
-                'complete_address' => 'Jl. Sudirman No. 12, Tanah Abang, Jakarta Pusat',
-                'experience'       => '3 tahun sebagai Software Developer di PT Teknologi Nusantara. Menguasai PHP, Laravel, dan Vue.js.',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
-                'web_portofolio_url' => 'https://ahmadfauzi.dev',
+                'name'               => 'Ahmad Fauzan',
+                'email'              => 'ahmad.fauzan@gmail.com',
+                'phone'              => '0812-3456-7890',
+                'gender'             => 'L',
+                'city'               => 'Jakarta',
+                'zip_code'           => '12950',
+                'cv_path'            => 'cv/candidate_1.pdf',
+                'portofolio_path'    => 'portofolio/candidate_1.pdf',
+                'web_portofolio_url' => 'https://ahmadfauzan.dev',
+                'complete_address'   => 'Jl. Kemang Raya No. 45, RT 003/RW 007, Kel. Bangka, Kec. Mampang Prapatan, Jakarta Selatan 12950',
+                'experience'        => 'Berpengalaman 3 tahun sebagai Backend Developer di PT Teknologi Nusantara. Mengembangkan REST API menggunakan Laravel dan mengelola database MySQL untuk aplikasi e-commerce dengan lebih dari 50.000 pengguna aktif. Sebelumnya magang di startup fintech selama 6 bulan.',
             ],
+
+            // Kandidat 2: HR background
             [
-                'name'             => 'Putri Handayani',
-                'email'            => 'putri.handayani@gmail.com',
-                'phone'            => '082345678901',
-                'gender'           => 'P',
-                'city'             => 'Bandung',
-                'zip_code'         => '40111',
-                'complete_address' => 'Jl. Dago No. 45, Coblong, Bandung',
-                'experience'       => '2 tahun sebagai Frontend Developer. Menguasai React.js, Tailwind CSS, dan Figma.',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
-                'web_portofolio_url' => 'https://putridev.com',
-            ],
-            [
-                'name'             => 'Rizal Maulana',
-                'email'            => 'rizal.maulana@gmail.com',
-                'phone'            => '083456789012',
-                'gender'           => 'L',
-                'city'             => 'Surabaya',
-                'zip_code'         => '60111',
-                'complete_address' => 'Jl. Pemuda No. 78, Gubeng, Surabaya',
-                'experience'       => 'Fresh graduate S1 Teknik Informatika. Magang 6 bulan di startup sebagai backend developer (Node.js).',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
+                'name'               => 'Siti Nurhaliza',
+                'email'              => 'siti.nurhaliza@gmail.com',
+                'phone'              => '0857-1234-5678',
+                'gender'             => 'P',
+                'city'               => 'Bandung',
+                'zip_code'           => '40132',
+                'cv_path'            => 'cv/candidate_2.pdf',
+                'portofolio_path'    => null,
                 'web_portofolio_url' => null,
+                'complete_address'   => 'Jl. Dago Atas No. 12, RT 001/RW 005, Kel. Dago, Kec. Coblong, Bandung 40132',
+                'experience'        => 'Lulusan S1 Psikologi Universitas Padjadjaran dengan pengalaman 2 tahun sebagai HR Generalist di PT Sejahtera Abadi. Menangani proses rekrutmen end-to-end, onboarding karyawan baru, dan administrasi BPJS. Memiliki sertifikasi CHRP dari BNSP.',
             ],
+
+            // Kandidat 3: Junior dev
             [
-                'name'             => 'Dewi Lestari',
-                'email'            => 'dewi.lestari@gmail.com',
-                'phone'            => '084567890123',
-                'gender'           => 'P',
-                'city'             => 'Yogyakarta',
-                'zip_code'         => '55111',
-                'complete_address' => 'Jl. Malioboro No. 10, Gedongtengen, Yogyakarta',
-                'experience'       => '4 tahun pengalaman di bidang HR & Rekrutmen. Familiar dengan berbagai platform rekrutmen dan psikotes.',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
+                'name'               => 'Rizky Pratama',
+                'email'              => 'rizky.pratama@gmail.com',
+                'phone'              => '0878-9012-3456',
+                'gender'             => 'L',
+                'city'               => 'Surabaya',
+                'zip_code'           => '60271',
+                'cv_path'            => 'cv/candidate_3.pdf',
+                'portofolio_path'    => 'portofolio/candidate_3.pdf',
+                'web_portofolio_url' => 'https://rizky-dev.netlify.app',
+                'complete_address'   => 'Jl. Raya Darmo No. 78, RT 005/RW 002, Kel. Darmo, Kec. Wonokromo, Surabaya 60271',
+                'experience'        => 'Fresh graduate Teknik Informatika ITS dengan pengalaman magang 6 bulan di Tokopedia sebagai Backend Engineer Intern. Mengerjakan microservice dengan Go dan Laravel. Aktif berkontribusi di open source dan memiliki beberapa project personal di GitHub.',
+            ],
+
+            // Kandidat 4: HR junior
+            [
+                'name'               => 'Dewi Anggraini',
+                'email'              => 'dewi.anggraini@gmail.com',
+                'phone'              => '0813-5678-9012',
+                'gender'             => 'P',
+                'city'               => 'Yogyakarta',
+                'zip_code'           => '55281',
+                'cv_path'            => 'cv/candidate_4.pdf',
+                'portofolio_path'    => null,
                 'web_portofolio_url' => null,
+                'complete_address'   => 'Jl. Malioboro No. 56, RT 002/RW 004, Kel. Suryatmajan, Kec. Danurejan, Yogyakarta 55281',
+                'experience'        => 'Lulusan S1 Manajemen UGM, memiliki pengalaman 1 tahun sebagai Admin HR di CV Mandiri Jaya. Menangani absensi karyawan, penggajian, dan administrasi cuti. Familiar dengan sistem HRIS dan Microsoft Excel tingkat lanjut.',
             ],
+
+            // Kandidat 5: Fullstack/frontend
             [
-                'name'             => 'Hendra Kusuma',
-                'email'            => 'hendra.kusuma@gmail.com',
-                'phone'            => '085678901234',
-                'gender'           => 'L',
-                'city'             => 'Semarang',
-                'zip_code'         => '50111',
-                'complete_address' => 'Jl. Pandanaran No. 22, Semarang Tengah, Semarang',
-                'experience'       => '5 tahun sebagai Financial Analyst di perbankan. Menguasai Excel tingkat lanjut, Power BI, dan SAP.',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
-                'web_portofolio_url' => null,
-            ],
-            [
-                'name'             => 'Siti Aminah',
-                'email'            => 'siti.aminah@gmail.com',
-                'phone'            => '086789012345',
-                'gender'           => 'P',
-                'city'             => 'Depok',
-                'zip_code'         => '16411',
-                'complete_address' => 'Jl. Margonda Raya No. 88, Pancoran Mas, Depok',
-                'experience'       => '2 tahun sebagai Customer Service di perusahaan e-commerce. Terbiasa menangani ratusan tiket keluhan per hari.',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
-                'web_portofolio_url' => null,
-            ],
-            [
-                'name'             => 'Bagas Prasetyo',
-                'email'            => 'bagas.prasetyo@gmail.com',
-                'phone'            => '087890123456',
-                'gender'           => 'L',
-                'city'             => 'Bekasi',
-                'zip_code'         => '17111',
-                'complete_address' => 'Jl. Ahmad Yani No. 55, Bekasi Selatan, Bekasi',
-                'experience'       => '3 tahun sebagai Backend Developer spesialisasi Python/Django dan PostgreSQL. Berpengalaman membangun microservices.',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
-                'web_portofolio_url' => 'https://github.com/bagasp',
-            ],
-            [
-                'name'             => 'Nurul Fadhilah',
-                'email'            => 'nurul.fadhilah@gmail.com',
-                'phone'            => '088901234567',
-                'gender'           => 'P',
-                'city'             => 'Tangerang',
-                'zip_code'         => '15111',
-                'complete_address' => 'Jl. MH Thamrin No. 33, Karawaci, Tangerang',
-                'experience'       => '6 tahun sebagai Marketing Manager di perusahaan FMCG. Berpengalaman memimpin tim 10 orang dan mengelola budget iklan lebih dari 1 miliar.',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
-                'web_portofolio_url' => 'https://linkedin.com/in/nurulfd',
-            ],
-            [
-                'name'             => 'Irfan Hakim',
-                'email'            => 'irfan.hakim@gmail.com',
-                'phone'            => '089012345678',
-                'gender'           => 'L',
-                'city'             => 'Bogor',
-                'zip_code'         => '16111',
-                'complete_address' => 'Jl. Pajajaran No. 99, Bogor Tengah, Bogor',
-                'experience'       => '2 tahun sebagai Procurement Staff di perusahaan manufaktur. Familiar dengan proses tender, PO, dan vendor management.',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
-                'web_portofolio_url' => null,
-            ],
-            [
-                'name'             => 'Laila Rahmasari',
-                'email'            => 'laila.rahmasari@gmail.com',
-                'phone'            => '081122334455',
-                'gender'           => 'P',
-                'city'             => 'Malang',
-                'zip_code'         => '65111',
-                'complete_address' => 'Jl. Ijen No. 17, Klojen, Malang',
-                'experience'       => 'S2 Bioteknologi. Pengalaman 1 tahun sebagai Research Assistant di laboratorium universitas.',
-                'cv_path'          => null,
-                'portofolio_path'  => null,
-                'web_portofolio_url' => null,
+                'name'               => 'Muhammad Ilham',
+                'email'              => 'muhammad.ilham@gmail.com',
+                'phone'              => '0856-7890-1234',
+                'gender'             => 'L',
+                'city'               => 'Depok',
+                'zip_code'           => '16424',
+                'cv_path'            => 'cv/candidate_5.pdf',
+                'portofolio_path'    => 'portofolio/candidate_5.pdf',
+                'web_portofolio_url' => 'https://ilham-portfolio.vercel.app',
+                'complete_address'   => 'Jl. Margonda Raya No. 100, RT 006/RW 003, Kel. Kemiri Muka, Kec. Beji, Depok 16424',
+                'experience'        => 'Frontend Developer dengan 2 tahun pengalaman di PT Digital Kreasi. Spesialisasi di React.js dan Next.js. Pernah memimpin redesign UI dashboard internal yang meningkatkan user engagement sebesar 40%. Berpengalaman dengan Tailwind CSS, TypeScript, dan integrasi REST API.',
             ],
         ];
 
-        foreach ($candidates as $candidate) {
-            $exists = DB::table('candidates')->where('email', $candidate['email'])->exists();
-            if (! $exists) {
-                DB::table('candidates')->insert(array_merge($candidate, [
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]));
-            }
+        foreach ($candidates as $candidateData) {
+            Candidate::firstOrCreate(
+                ['email' => $candidateData['email']],
+                $candidateData
+            );
         }
     }
 }

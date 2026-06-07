@@ -70,6 +70,13 @@ class ApplicationController extends Controller
 
         $applications = $query->orderByDesc('created_at')
             ->paginate($request->get('per_page', 15));
+        if ($applications->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

@@ -73,6 +73,13 @@ class PositionController extends Controller
             unset($data['recruitment_criteria_count'], $data['recruitment_criteria_sum_weight']);
             return $data;
         });
+        if ($positions->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tidak ditemukan.',
+                'data'    => [],
+            ]);
+        }
 
         return response()->json([
             'success' => true,

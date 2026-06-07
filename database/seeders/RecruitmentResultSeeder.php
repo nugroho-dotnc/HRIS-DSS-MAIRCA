@@ -2,56 +2,39 @@
 
 namespace Database\Seeders;
 
+use App\Models\Application;
+use App\Models\RecruitmentResult;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class RecruitmentResultSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     * Seed recruitment_results untuk aplikasi yang sudah interview_done atau hired.
-     */
     public function run(): void
     {
-        $applications = DB::table('applications')
-            ->whereIn('status', ['interview_done', 'hired'])
-            ->select('id', 'status')
-            ->get();
+        // Hasil DSS MAIRCA hanya untuk aplikasi yang sudah final: hired / rejected
+        // Kedua aplikasi ini berada di lowongan yang sama (Backend Developer – Laravel)
 
-        if ($applications->isEmpty()) {
-            $this->command->warn('No interview-done/hired applications found. Run ApplicationSeeder first.');
-            return;
-        }
+        // APP-2026-00001: Ahmad → hired → ranking 1, skor lebih tinggi
+        $appHired = Application::where('application_code', 'APP-2026-00001')->first();
+        RecruitmentResult::firstOrCreate(
+            ['application_id' => $appHired->id],
+            [
+                'application_id' => $appHired->id,
+                'final_score'    => 0.8234,  // Skor MAIRCA (0-1, lebih tinggi = lebih baik)
+                'ranking'        => 1,
+                'decission'      => 'hired',
+            ]
+        );
 
-        // Data skor MAIRCA final per aplikasi (simulasi hasil perhitungan)
-        $resultData = [
-            ['final_score' => 0.8523, 'decission' => 'hired'],
-            ['final_score' => 0.7914, 'decission' => 'hired'],
-            ['final_score' => 0.7235, 'decission' => 'hired'],
-            ['final_score' => 0.6811, 'decission' => 'rejected'],
-            ['final_score' => 0.6102, 'decission' => 'rejected'],
-        ];
-
-        foreach ($applications as $i => $application) {
-            $exists = DB::table('recruitment_results')
-                ->where('application_id', $application->id)
-                ->exists();
-
-            if (! $exists) {
-                $data = $resultData[$i % count($resultData)];
-
-                // Jika status aplikasi 'hired', keputusan pasti hired
-                $decission = ($application->status === 'hired') ? 'hired' : $data['decission'];
-
-                DB::table('recruitment_results')->insert([
-                    'application_id' => $application->id,
-                    'final_score'    => $data['final_score'],
-                    'ranking'        => $i + 1,
-                    'decission'      => $decission,
-                    'created_at'     => now(),
-                    'updated_at'     => now(),
-                ]);
-            }
-        }
+        // APP-2026-00002: Rizky → rejected → ranking 2, skor lebih rendah
+        $appRejected = Application::where('application_code', 'APP-2026-00002')->first();
+        RecruitmentResult::firstOrCreate(
+            ['application_id' => $appRejected->id],
+            [
+                'application_id' => $appRejected->id,
+                'final_score'    => 0.4517,  // Skor MAIRCA lebih rendah
+                'ranking'        => 2,
+                'decission'      => 'rejected',
+            ]
+        );
     }
 }
