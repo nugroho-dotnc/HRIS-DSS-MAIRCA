@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Candidate;
 use App\Models\Vacancies;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
@@ -291,6 +293,13 @@ class ApplicationController extends Controller
             'status' => 'applied',
             'application_code' => $applicationCode,
         ]);
+
+        // Trigger notifikasi ke semua HR
+        try {
+            app(NotificationService::class)->notifyHrNewApplication($application);
+        } catch (\Throwable $e) {
+            Log::error('[Notification] Gagal kirim notifikasi lamaran baru: ' . $e->getMessage());
+        }
 
         return response()->json([
             'success' => true,

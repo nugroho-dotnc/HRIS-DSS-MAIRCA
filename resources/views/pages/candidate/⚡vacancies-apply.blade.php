@@ -10,6 +10,7 @@ use Livewire\Attributes\Validate;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Services\NotificationService;
 
 new #[Layout('layouts::guest')] class extends Component
 {
@@ -69,6 +70,13 @@ new #[Layout('layouts::guest')] class extends Component
             [$candidate, $cvPath, $portofolioPath] = $this->createCandidate();
             $application = $this->createApplication($candidate->id);
             DB::commit();
+
+            // Trigger Notification ke HR
+            try {
+                app(NotificationService::class)->notifyHrNewApplication($application);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('[Notification] Gagal kirim notifikasi new application (Web): ' . $e->getMessage());
+            }
 
             // mailer settings here ....
 

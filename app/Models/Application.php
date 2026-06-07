@@ -34,4 +34,10 @@ class Application extends Model
     {
         return $this->hasOne(RecruitmentResult::class, 'application_id', 'id');
     }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'recipient_id', 'id')
+                    ->where('recipient_type', 'candidate');
+    }
 }

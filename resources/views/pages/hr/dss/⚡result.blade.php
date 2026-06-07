@@ -3,6 +3,7 @@
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Services\MAIRCA;
+use App\Services\NotificationService;
 
 new #[Layout('layouts::hr', [
     'page_title' => 'Hasil Perhitungan MAIRCA',
@@ -15,7 +16,16 @@ new #[Layout('layouts::hr', [
     {
         try {
             $service = new MAIRCA();
-            return $service->calculate($this->vacancyId);
+            $calculation = $service->calculate($this->vacancyId);
+
+            // Trigger Notifikasi ke Candidate (Aman karena sudah ada cek mencegah duplikasi di Service)
+            try {
+                app(NotificationService::class)->notifyDssCompleted($this->vacancyId);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('[Notification] Gagal kirim notifikasi DSS completed (Web): ' . $e->getMessage());
+            }
+
+            return $calculation;
         } catch (\Exception $e) {
             return $e->getMessage();
         }

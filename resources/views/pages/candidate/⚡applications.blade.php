@@ -17,7 +17,9 @@ new #[Layout('layouts::guest')] class extends Component
             return collect();
         }
 
-        return Application::with(['candidate', 'vacancy.position'])
+        return Application::with(['candidate', 'vacancy.position', 'notifications' => function ($query) {
+            $query->orderBy('created_at', 'desc');
+        }])
             ->where(function ($query) {
                 $query->whereHas('candidate', function ($q) {
                     $q->where('name', 'LIKE', $this->search);
@@ -25,6 +27,14 @@ new #[Layout('layouts::guest')] class extends Component
                 ->orWhere('application_code', 'LIKE', $this->search);
             })
             ->get();
+    }
+
+    public function markNotificationAsRead($id)
+    {
+        $notification = \App\Models\Notification::find($id);
+        if ($notification && $notification->recipient_type === 'candidate') {
+            $notification->update(['is_read' => true]);
+        }
     }
 };
 ?>
@@ -110,6 +120,37 @@ new #[Layout('layouts::guest')] class extends Component
                         </div>
 
                     </div>
+
+                    <!-- Notifikasi Section -->
+                    @if($app->notifications->isNotEmpty())
+                        <div class="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                            <flux:heading size="sm" class="mb-3">Notifikasi Terkait</flux:heading>
+                            <div class="space-y-2">
+                                @foreach($app->notifications as $notif)
+                                    <div
+                                        class="p-3 rounded-lg flex items-start gap-3 {{ $notif->is_read ? 'bg-zinc-50 dark:bg-zinc-800/50' : 'bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800' }}"
+                                        @if(!$notif->is_read) wire:click="markNotificationAsRead({{ $notif->id }})" role="button" @endif
+                                    >
+                                        <flux:icon name="bell" variant="mini" class="mt-0.5 shrink-0 {{ $notif->is_read ? 'text-zinc-400' : 'text-indigo-500' }}" />
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium {{ $notif->is_read ? 'text-zinc-600 dark:text-zinc-300' : 'text-indigo-900 dark:text-indigo-100' }}">
+                                                {{ $notif->title }}
+                                                @if(!$notif->is_read)
+                                                    <span class="inline-block w-2 h-2 ml-1 bg-indigo-500 rounded-full"></span>
+                                                @endif
+                                            </p>
+                                            <p class="text-xs mt-0.5 {{ $notif->is_read ? 'text-zinc-500' : 'text-indigo-700 dark:text-indigo-300' }}">
+                                                {{ $notif->body }}
+                                            </p>
+                                            <p class="text-[10px] mt-1 {{ $notif->is_read ? 'text-zinc-400' : 'text-indigo-400' }}">
+                                                {{ $notif->created_at->diffForHumans() }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </flux:card>
                 @empty
                     @if(!empty(trim($search)))

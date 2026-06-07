@@ -7,8 +7,10 @@ use App\Models\Application;
 use App\Models\RecruitmentResult;
 use App\Models\Vacancies;
 use App\Services\MAIRCAService;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use OpenApi\Attributes as OA;
 
 class MAIRCAController extends Controller
@@ -48,6 +50,13 @@ class MAIRCAController extends Controller
     {
         try {
             $result = $this->maircaService->calculate((int) $vacancyId);
+
+            // Trigger notifikasi ke semua candidate yang melamar posisi ini
+            try {
+                app(NotificationService::class)->notifyDssCompleted((int) $vacancyId);
+            } catch (\Throwable $e) {
+                Log::error('[Notification] Gagal kirim notifikasi DSS completed: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'success' => true,

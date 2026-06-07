@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Candidate\ApplicationController as CandidateApplicationController;
 use App\Http\Controllers\Api\Candidate\VacancyController as CandidateVacancyController;
+use App\Http\Controllers\Api\FcmTokenController;
 use App\Http\Controllers\Api\Public\DepartmentController as PublicDepartmentController;
 use App\Http\Controllers\Api\Public\PositionController as PublicPositionController;
 use App\Http\Controllers\Api\Employee\ProfileController;
@@ -72,6 +73,16 @@ Route::prefix('positions')->group(function () {
 Route::post('/applications/generate-code', [CandidateApplicationController::class, 'generateCode'])->name('api.candidate.generate-code');
 Route::post('/apply', [CandidateApplicationController::class, 'apply'])->name('api.candidate.apply');
 Route::get('/track/{applicationCode}', [CandidateApplicationController::class, 'track'])->name('api.candidate.track');
+
+// FCM Token — Public (candidate tidak login)
+Route::prefix('fcm-tokens')->name('api.fcm-tokens.')->group(function () {
+    Route::post('/candidate', [FcmTokenController::class, 'registerCandidate'])->name('candidate.register');
+    Route::delete('/', [FcmTokenController::class, 'destroy'])->name('destroy');
+});
+
+// Notifications — Public (candidate access via application_code)
+Route::get('/notifications/candidate/{applicationCode}', [FcmTokenController::class, 'notificationsCandidate'])->name('api.notifications.candidate');
+Route::patch('/notifications/{id}/read', [FcmTokenController::class, 'markAsRead'])->name('api.notifications.read');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🔐 AUTHENTICATED ROUTES — Semua role harus login (Sanctum)
@@ -176,6 +187,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // DASHBOARD
         Route::get('/dashboard', [HRDashboardController::class, 'index'])->name('dashboard');
+
+        // FCM Token & Notifications (HR)
+        Route::post('/fcm-tokens', [FcmTokenController::class, 'registerHr'])->name('fcm-tokens.register');
+        Route::get('/notifications', [FcmTokenController::class, 'notificationsHr'])->name('notifications.index');
     });
 
     // ──────────────────────────────────────────────────────────────────────
