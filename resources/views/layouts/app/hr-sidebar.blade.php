@@ -40,11 +40,14 @@
 
             <flux:spacer />
 
-            <div class="hidden lg:flex px-4 py-2 border-t border-zinc-200 dark:border-zinc-700">
-                <livewire:notification-bell />
+            <div class="hidden lg:flex items-center justify-between px-2 py-2 border-t border-zinc-200 dark:border-zinc-700 w-full gap-2">
+                <div class="flex-1">
+                    <x-desktop-user-menu :name="auth()->user()->name" />
+                </div>
+                <div class="flex-none">
+                    <livewire:notification-bell />
+                </div>
             </div>
-
-            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
 
         <!-- Mobile User Menu -->

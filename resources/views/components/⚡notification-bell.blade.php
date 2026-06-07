@@ -44,7 +44,7 @@ new class extends Component
 
 <div>
     <flux:dropdown position="bottom" align="start">
-        <flux:button variant="ghost" icon="bell" class="relative">
+        <flux:button variant="ghost" icon="bell" class="relative" square>
             @if($this->unreadCount > 0)
                 <span class="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
