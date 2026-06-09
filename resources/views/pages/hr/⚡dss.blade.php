@@ -8,9 +8,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Hasil DSS', 'page_description' => 
 {
     public function vacancies()
     {
-        // Ambil vacancy yang deadline-nya hari ini atau sudah lewat
         return Vacancies::with(['position.department'])
-            ->whereDate('deadline', '<=', today())
             ->orderByDesc('deadline')
             ->get();
     }

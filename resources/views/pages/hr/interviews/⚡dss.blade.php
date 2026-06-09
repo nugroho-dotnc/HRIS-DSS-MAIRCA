@@ -122,8 +122,10 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
      * Dipanggil otomatis Livewire tiap kali $scores berubah.
      * Validasi field tunggal secara real-time (saat blur).
      */
-    public function updatedScores(mixed $value, string $key): void
+    public function updatedScores(mixed $value, ?string $key): void
     {
+    
+        if ($key === null) return;
         $rules    = $this->buildRules();
         $messages = $this->buildMessages();
         $field    = "scores.{$key}";
