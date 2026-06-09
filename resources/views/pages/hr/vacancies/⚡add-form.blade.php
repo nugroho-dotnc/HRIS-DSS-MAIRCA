@@ -52,7 +52,10 @@ new #[Layout('layouts::hr', ['page_title' => 'New Vacancies'])] class extends Co
 
         {{-- Header --}}
         <div class="flex items-start justify-between gap-4">
-            <flux:input type="text" wire:model="title" placeholder="Tuliskan judul lowongan" class="text-2xl font-bold"/>
+            <div class="flex-1 mr-4">
+                <flux:input type="text" wire:model="title" placeholder="Tuliskan judul lowongan" class="text-2xl font-bold"/>
+                <flux:error name="title" />
+            </div>
             <flux:button variant="primary" class="cursor-pointer" wire:click="save">Simpan</flux:button>
         </div>
 
@@ -70,12 +73,14 @@ new #[Layout('layouts::hr', ['page_title' => 'New Vacancies'])] class extends Co
                             <flux:select.option value="{{ $post->id }}">{{ $post->position_name }}</flux:select.option>
                         @endforeach
                     </flux:select>
+                    <flux:error name="position_id" />
                 @endif
             </div>
 
             <div class="flex flex-col gap-1">
                 <span class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Deadline</span>
                 <flux:input type="date" wire:model="deadline" max="2999-12-31"/>
+                <flux:error name="deadline" />
             </div>
         </div>
 
@@ -86,6 +91,7 @@ new #[Layout('layouts::hr', ['page_title' => 'New Vacancies'])] class extends Co
             <span class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Deskripsi Pekerjaan</span>
             <flux:textarea wire:model="description" rows="6"
                 placeholder="Jelaskan gambaran umum posisi ini, tanggung jawab utama, dan lingkungan kerja..."/>
+            <flux:error name="description" />
         </div>
 
         <flux:separator/>
@@ -95,6 +101,7 @@ new #[Layout('layouts::hr', ['page_title' => 'New Vacancies'])] class extends Co
             <span class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Persyaratan</span>
             <flux:textarea wire:model="requirements" rows="6"
                 placeholder="Tuliskan kualifikasi yang dibutuhkan untuk posisi ini..."/>
+            <flux:error name="requirements" />
         </div>
 
         <div class="flex items-center gap-2">

@@ -82,7 +82,10 @@ new #[Layout('layouts::hr', ['page_title' => 'Preview'])] class extends Componen
         {{-- Header --}}
         <div class="flex items-start justify-between gap-4">
             @if($isEdit)
-                <flux:input type="text" wire:model="title" placeholder="Tuliskan judul lowongan" class="text-2xl font-bold"/>
+                <div>
+                    <flux:input type="text" wire:model="title" placeholder="Tuliskan judul lowongan" class="text-2xl font-bold"/>
+                    <flux:error name="title" />
+                </div>
             @else
                 <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $title }}</h1>
             @endif
@@ -111,6 +114,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Preview'])] class extends Componen
                                 <flux:select.option value="{{ $post->id }}">{{ $post->position_name }}</flux:select.option>
                             @endforeach
                         </flux:select>
+                        <flux:error name="position_id" />
                     @endif
                 @else
                     <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -123,6 +127,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Preview'])] class extends Componen
                 <span class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Deadline</span>
                 @if($isEdit)
                     <flux:input type="date" wire:model="deadline" max="2999-12-31"/>
+                    <flux:error name="deadline" />
                 @else
                     <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                         {{ \Carbon\Carbon::parse($deadline)->translatedFormat('d F Y') }}
@@ -139,6 +144,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Preview'])] class extends Componen
             @if($isEdit)
                 <flux:textarea wire:model="description" rows="6"
                     placeholder="Jelaskan gambaran umum posisi ini, tanggung jawab utama, dan lingkungan kerja..."/>
+                <flux:error name="description" />
             @else
                 <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-line">{{ $description }}</p>
             @endif
@@ -152,6 +158,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Preview'])] class extends Componen
             @if($isEdit)
                 <flux:textarea wire:model="requirements" rows="6"
                     placeholder="Tuliskan kualifikasi yang dibutuhkan untuk posisi ini..."/>
+                <flux:error name="requirements" />
             @else
                 <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-line">{{ $requirements }}</p>
             @endif

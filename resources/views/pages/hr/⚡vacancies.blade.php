@@ -19,7 +19,7 @@ new  #[Layout('layouts::hr', ['page_title' => 'Vacancies', 'page_description' =>
 
     public function vacancies(){
         $query = Vacancies::where('title', 'like',"%".$this->search."%")
-            ->with(['Hr', 'Position']);
+            ->with(['Hr', 'Position.department']);
 
         if ($this->filterStatus) {
             $query->where('status', $this->filterStatus);
@@ -102,7 +102,8 @@ new  #[Layout('layouts::hr', ['page_title' => 'Vacancies', 'page_description' =>
         @if (count($this->vacancies()) != 0)
             <flux:table :paginate="$this->vacancies()">
                 <flux:table.columns>
-                    <flux:table.column class="2/7">HR</flux:table.column>
+                    <flux:table.column class="1/7">HR</flux:table.column>
+                    <flux:table.column class="1/7">Department</flux:table.column>
                     <flux:table.column class="1/7">Position</flux:table.column>
                     <flux:table.column class="1/7">Title</flux:table.column>
                     <flux:table.column class="1/7">
@@ -118,6 +119,7 @@ new  #[Layout('layouts::hr', ['page_title' => 'Vacancies', 'page_description' =>
                     @foreach ($this->vacancies() as $vac)
                         <flux:table.row>
                             <flux:table.cell>{{$vac->Hr->name}}</flux:table.cell>
+                            <flux:table.cell>{{$vac->Position->department->department_name}}</flux:table.cell>
                             <flux:table.cell>{{$vac->Position->position_name}}</flux:table.cell>
                             <flux:table.cell>{{$vac->title}}</flux:table.cell>
                             <flux:table.cell>
