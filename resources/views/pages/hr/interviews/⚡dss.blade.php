@@ -25,6 +25,15 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
             'scores',
         ])->findOrFail($this->sessionId);
 
+        // Inisialisasi default agar placeholder select berfungsi & form tidak error
+        foreach ($this->criterias() as $criteria) {
+            if ($criteria->data_type === 'kualitatif') {
+                $this->scores[$criteria->id] = ''; // string kosong penting untuk Select
+            } else {
+                $this->scores[$criteria->id] = null; // null aman untuk Input number
+            }
+        }
+
         // Pre-fill nilai yang sudah ada sebelumnya
         foreach ($session->scores as $score) {
             $this->scores[$score->criteria_id] = $score->score;
@@ -113,7 +122,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
                     ? "IPK tidak boleh melebihi 4.00."
                     : "'{$name}' tidak boleh melebihi {$max}.";
             }
-            
+
         }
         return $messages;
     }
@@ -124,7 +133,7 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
      */
     public function updatedScores(mixed $value, ?string $key): void
     {
-    
+
         if ($key === null) return;
         $rules    = $this->buildRules();
         $messages = $this->buildMessages();
@@ -244,9 +253,9 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
                             {{-- Dropdown Likert --}}
                             <flux:select
                                 wire:model.live="scores.{{ $criteria->id }}"
-                                placeholder="Pilih nilai..."
                                 size="sm"
                             >
+                                <flux:select.option value="" disabled selected>Pilih nilai...</flux:select.option>
                                 @foreach($criteria->likertScales->sortBy('value') as $scale)
                                     <flux:select.option value="{{ $scale->value }}">
                                         {{ $scale->label }} ({{ $scale->value }})
@@ -255,48 +264,14 @@ new #[Layout('layouts::hr', ['page_title' => 'Sesi Interview DSS'])] class exten
                             </flux:select>
                             <flux:error name="scores.{{ $criteria->id }}" />
                         @else
-                            {{-- Input angka kuantitatif --}}
-                            @php
-                                $isIpk  = str_contains(strtolower($criteria->name), 'ipk');
-                                $isGaji = str_contains(strtolower($criteria->name), 'gaji');
-                                $maxVal = $isIpk ? 4 : ($isGaji ? null : 100);
-                                $stepVal = $isIpk ? '0.01' : '1';
-                                
-                                if ($isIpk) {
-                                    $placeholder = '0.00 – 4.00';
-                                    $helpText = 'Rentang: 0.00 – 4.00';
-                                } elseif ($isGaji) {
-                                    $placeholder = 'Minimal 0';
-                                    $helpText = 'Minimal 0 (tidak ada batas maksimum)';
-                                } else {
-                                    $placeholder = '0 – 100';
-                                    $helpText = 'Rentang: 0 – 100';
-                                }
-                            @endphp
-                            @if($maxVal !== null)
-                                <flux:input
+                            <flux:input
                                     wire:model.blur="scores.{{ $criteria->id }}"
                                     type="number"
-                                    step="{{ $stepVal }}"
                                     min="0"
-                                    max="{{ $maxVal }}"
-                                    placeholder="{{ $placeholder }}"
+                                    placeholder="Input angka..."
                                     size="sm"
                                 />
-                            @else
-                                <flux:input
-                                    wire:model.blur="scores.{{ $criteria->id }}"
-                                    type="number"
-                                    step="{{ $stepVal }}"
-                                    min="0"
-                                    placeholder="{{ $placeholder }}"
-                                    size="sm"
-                                />
-                            @endif
                             <flux:error name="scores.{{ $criteria->id }}" />
-                            <span class="text-xs text-zinc-400">
-                                {{ $helpText }}
-                            </span>
                         @endif
                     </div>
                 @endforeach
