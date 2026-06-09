@@ -56,7 +56,7 @@ class RecruitmentCriteriaController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Data tidak ditemukan.',
-                'data'    => [],
+                'data' => [],
             ]);
         }
 
@@ -108,7 +108,7 @@ class RecruitmentCriteriaController extends Controller
     public function getByPosition(string $id): JsonResponse
     {
         $position = \App\Models\Position::findOrFail($id);
-        
+
         $criteria = RecruitmentCriteria::with(['likertScales'])
             ->where('position_id', $id)
             ->orderBy('name')
@@ -171,7 +171,7 @@ class RecruitmentCriteriaController extends Controller
         $request->validate([
             'position_id' => 'required|exists:positions,id',
             'name' => 'required|string|max:255',
-            'weight' => 'required|numeric|min:0|max:100',
+            'weight' => 'required|numeric|min:0|max:1',
             'description' => 'nullable|string',
             'type' => ['required', Rule::in(['benefit', 'cost'])],
             'data_type' => ['required', Rule::in(['kualitatif', 'kuantitatif'])],
@@ -181,12 +181,12 @@ class RecruitmentCriteriaController extends Controller
         $existingWeight = RecruitmentCriteria::where('position_id', $request->position_id)
             ->sum('weight');
 
-        if (($existingWeight + $request->weight) > 100) {
+        if (($existingWeight + $request->weight) > 1) {
             return response()->json([
                 'success' => false,
-                'message' => 'Total bobot kriteria untuk posisi ini akan melebihi 100%. Sisa bobot yang tersedia: ' . (100 - $existingWeight) . '%.',
+                'message' => 'Total bobot kriteria untuk posisi ini akan melebihi 100%. Sisa bobot yang tersedia: ' . (1 - $existingWeight) . '%.',
                 'existing_weight' => $existingWeight,
-                'available_weight' => 100 - $existingWeight,
+                'available_weight' => 1 - $existingWeight,
                 'data' => null,
             ], 422);
         }
@@ -290,7 +290,7 @@ class RecruitmentCriteriaController extends Controller
 
         $request->validate([
             'name' => 'sometimes|string|max:255',
-            'weight' => 'sometimes|numeric|min:0|max:100',
+            'weight' => 'sometimes|numeric|min:0|max:1',
             'description' => 'nullable|string',
             'type' => ['sometimes', Rule::in(['benefit', 'cost'])],
             'data_type' => ['sometimes', Rule::in(['kualitatif', 'kuantitatif'])],
@@ -302,11 +302,11 @@ class RecruitmentCriteriaController extends Controller
                 ->where('id', '!=', $id)
                 ->sum('weight');
 
-            if (($otherWeight + $request->weight) > 100) {
+            if (($otherWeight + $request->weight) > 1) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Total bobot kriteria akan melebihi 100%. Bobot dari kriteria lain: ' . $otherWeight . '%.',
-                    'available_weight' => 100 - $otherWeight,
+                    'available_weight' => 1 - $otherWeight,
                     'data' => null,
                 ], 422);
             }

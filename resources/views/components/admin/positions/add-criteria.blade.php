@@ -11,7 +11,7 @@
 
         <flux:table.cell class="w-1/4">
             <flux:field>
-                <flux:input wire:model="weight" type="text" placeholder="Masukkan bobot (%)" size="sm"/>
+                <flux:input wire:model="weight" type="text" placeholder="Contoh 0.25 (untuk 25%)" size="sm"/>
                 <flux:error name="weight" />
             </flux:field>
         </flux:table.cell>

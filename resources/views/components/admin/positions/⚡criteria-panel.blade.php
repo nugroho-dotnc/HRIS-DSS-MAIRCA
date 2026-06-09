@@ -16,7 +16,7 @@ new class extends Component
     #[Validate('required|min:3|max:50')]
     public $name = '';
 
-    #[Validate('required|numeric|min:0|max:100')]
+    #[Validate('required|numeric|min:0|max:1')]
     public $weight = '';
 
     #[Validate('required|in:benefit,cost')]
@@ -94,10 +94,10 @@ new class extends Component
         }
         $totalWeight = RecruitmentCriteria::where('position_id', $this->positionId)->sum('weight')??0;
         $newWeight = $totalWeight - $specificWeight + $w;
-        if($newWeight <= 100){
+        if($newWeight <= 1){
             return true;
         }
-        Flux::toast('Gagal, Jumlah bobot lebih besar 100%!');
+        Flux::toast('Gagal, Jumlah bobot lebih besar 1 (100%)!');
         return false;
     }
 
