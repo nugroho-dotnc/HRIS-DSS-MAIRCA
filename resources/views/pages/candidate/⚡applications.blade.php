@@ -40,23 +40,13 @@ new #[Layout('layouts::guest')] class extends Component
 ?>
 
 <div>
-    <section class="flex flex-col gap-4 md:gap-6 items-center justify-start w-full max-w-2xl mx-auto py-6 md:py-10" id="vacancies">
-        <div class="text-center flex flex-col gap-1.5">
-            <h1 class="text-xl md:text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">Lacak Status Lamaran</h1>
-            <p class="text-zinc-500 dark:text-zinc-400 text-xs md:text-sm">
-                Masukkan nama lengkap atau kode aplikasi untuk melihat status rekrutmen terbaru.
-            </p>
-        </div>
+    <section class="flex flex-col gap-4 md:gap-6 items-center justify-start w-full max-w-2xl mx-auto py-6" id="vacancies">
+        <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-center">Lacak Status Lamaran</h1>
+        <p class="text-center w-full max-w-3xl text-sm md:text-base text-zinc-500 dark:text-zinc-400">
+            Masukkan nama lengkap atau kode aplikasi untuk melihat status rekrutmen terbaru.
+        </p>
 
-        <div class="w-full">
-            <flux:input
-                wire:model.live.debounce.300ms="search"
-                type="text"
-                kbd="⌘K"
-                icon="magnifying-glass"
-                placeholder="Masukkan nama atau applications code"
-            />
-        </div>
+        <flux:input wire:model.live.debounce.300ms="search" type="text" class="w-full max-w-xs md:max-w-md" kbd="⌘K" icon="magnifying-glass" placeholder="Masukkan nama atau applications code"/>
 
         <div class="w-full flex flex-col gap-3 mt-2">
             @forelse ($this->applications as $app)
