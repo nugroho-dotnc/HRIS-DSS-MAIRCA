@@ -229,6 +229,183 @@ new #[Layout('layouts::hr', [
                 @endforeach
             </div>
         </div>
+
+        {{-- Detail Perhitungan MAIRCA --}}
+        <div x-data="{ showDetails: false }" class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
+                    <flux:icon name="calculator" class="size-4"/>
+                    Langkah Perhitungan MAIRCA
+                </h2>
+                <flux:button size="sm" variant="subtle" class="cursor-pointer" x-on:click="showDetails = !showDetails">
+                    <span x-text="showDetails ? 'Sembunyikan Detail' : 'Tampilkan Detail'"></span>
+                </flux:button>
+            </div>
+
+            <div x-cloak x-show="showDetails" style="display: none;" x-transition class="flex flex-col gap-8 mt-2">
+                {{-- 1. Decision Matrix --}}
+                <div class="flex flex-col gap-2 overflow-x-auto">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">1. Matriks Keputusan (Decision Matrix)</h3>
+                        <div class="bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            <p class="text-xs text-zinc-600 dark:text-zinc-400 font-mono">
+                                X = [x_ij]
+                            </p>
+                            <p class="text-[11px] text-zinc-500 mt-1">Matriks awal yang berisi nilai asli dari setiap kandidat (i) pada tiap kriteria (j).</p>
+                        </div>
+                    </div>
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>Alternatif / Kandidat</flux:table.column>
+                            @foreach($result['criteria'] as $criteriaName)
+                                <flux:table.column>{{ $criteriaName }}</flux:table.column>
+                            @endforeach
+                        </flux:table.columns>
+                        <flux:table.rows>
+                            @foreach($result['alternatives'] as $i => $alt)
+                                <flux:table.row>
+                                    <flux:table.cell class="font-medium">{{ $alt }}</flux:table.cell>
+                                    @foreach($result['decision_matrix'][$i] as $val)
+                                        <flux:table.cell>{{ $val }}</flux:table.cell>
+                                    @endforeach
+                                </flux:table.row>
+                            @endforeach
+                        </flux:table.rows>
+                    </flux:table>
+                </div>
+
+                {{-- 2. Normalized Matrix --}}
+                <div class="flex flex-col gap-2 overflow-x-auto">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">2. Matriks Normalisasi (Normalized Matrix)</h3>
+                        <div class="bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            <p class="text-xs text-zinc-600 dark:text-zinc-400 font-mono">
+                                Benefit: n_ij = (x_ij - x_min) / (x_max - x_min)<br/>
+                                Cost: n_ij = (x_max - x_ij) / (x_max - x_min)
+                            </p>
+                            <p class="text-[11px] text-zinc-500 mt-1">Normalisasi nilai menggunakan rumus berbeda tergantung pada jenis kriterianya (Benefit atau Cost).</p>
+                        </div>
+                    </div>
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>Alternatif / Kandidat</flux:table.column>
+                            @foreach($result['criteria'] as $criteriaName)
+                                <flux:table.column>{{ $criteriaName }}</flux:table.column>
+                            @endforeach
+                        </flux:table.columns>
+                        <flux:table.rows>
+                            @foreach($result['alternatives'] as $i => $alt)
+                                <flux:table.row>
+                                    <flux:table.cell class="font-medium">{{ $alt }}</flux:table.cell>
+                                    @foreach($result['normalized_matrix'][$i] as $val)
+                                        <flux:table.cell>{{ number_format($val, 4) }}</flux:table.cell>
+                                    @endforeach
+                                </flux:table.row>
+                            @endforeach
+                        </flux:table.rows>
+                    </flux:table>
+                </div>
+
+                {{-- 3. Theoretical Matrix --}}
+                <div class="flex flex-col gap-2 overflow-x-auto">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">3. Matriks Teoritis (Theoretical Matrix)</h3>
+                        <div class="bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            <p class="text-xs text-zinc-600 dark:text-zinc-400 font-mono">
+                                t_ij = P_i × w_j
+                            </p>
+                            <p class="text-[11px] text-zinc-500 mt-1">Di mana P_i = 1 / jumlah kandidat (Preferensi), dan w_j adalah bobot tiap kriteria.</p>
+                        </div>
+                    </div>
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>Alternatif / Kandidat</flux:table.column>
+                            @foreach($result['criteria'] as $criteriaName)
+                                <flux:table.column>{{ $criteriaName }}</flux:table.column>
+                            @endforeach
+                        </flux:table.columns>
+                        <flux:table.rows>
+                            @foreach($result['alternatives'] as $i => $alt)
+                                <flux:table.row>
+                                    <flux:table.cell class="font-medium">{{ $alt }}</flux:table.cell>
+                                    @foreach($result['theoretical_matrix'][$i] as $val)
+                                        <flux:table.cell>{{ number_format($val, 4) }}</flux:table.cell>
+                                    @endforeach
+                                </flux:table.row>
+                            @endforeach
+                        </flux:table.rows>
+                    </flux:table>
+                </div>
+
+                {{-- 4. Actual Matrix --}}
+                <div class="flex flex-col gap-2 overflow-x-auto">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">4. Matriks Aktual (Actual Matrix)</h3>
+                        <div class="bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            <p class="text-xs text-zinc-600 dark:text-zinc-400 font-mono">
+                                tr_ij = t_ij × n_ij
+                            </p>
+                            <p class="text-[11px] text-zinc-500 mt-1">Didapatkan dari perkalian Matriks Teoritis (t_ij) dengan Matriks Normalisasi (n_ij).</p>
+                        </div>
+                    </div>
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>Alternatif / Kandidat</flux:table.column>
+                            @foreach($result['criteria'] as $criteriaName)
+                                <flux:table.column>{{ $criteriaName }}</flux:table.column>
+                            @endforeach
+                        </flux:table.columns>
+                        <flux:table.rows>
+                            @foreach($result['alternatives'] as $i => $alt)
+                                <flux:table.row>
+                                    <flux:table.cell class="font-medium">{{ $alt }}</flux:table.cell>
+                                    @foreach($result['actual_matrix'][$i] as $val)
+                                        <flux:table.cell>{{ number_format($val, 4) }}</flux:table.cell>
+                                    @endforeach
+                                </flux:table.row>
+                            @endforeach
+                        </flux:table.rows>
+                    </flux:table>
+                </div>
+
+                {{-- 5. Gap Matrix --}}
+                <div class="flex flex-col gap-2 overflow-x-auto">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">5. Matriks Jarak / Evaluasi (Gap Matrix) & Qi</h3>
+                        <div class="bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            <p class="text-xs text-zinc-600 dark:text-zinc-400 font-mono">
+                                g_ij = |t_ij - tr_ij|<br/>
+                                Qi = Σ g_ij
+                            </p>
+                            <p class="text-[11px] text-zinc-500 mt-1">Selisih absolut antara Matriks Teoritis dan Aktual. Total dari g_ij merupakan nilai Qi (semakin kecil semakin baik).</p>
+                        </div>
+                    </div>
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>Alternatif / Kandidat</flux:table.column>
+                            @foreach($result['criteria'] as $criteriaName)
+                                <flux:table.column>{{ $criteriaName }}</flux:table.column>
+                            @endforeach
+                            <flux:table.column>Nilai Qi (Total)</flux:table.column>
+                        </flux:table.columns>
+                        <flux:table.rows>
+                            @foreach($result['alternatives'] as $i => $alt)
+                                <flux:table.row>
+                                    <flux:table.cell class="font-medium">{{ $alt }}</flux:table.cell>
+                                    @foreach($result['gap_matrix'][$i] as $val)
+                                        <flux:table.cell>{{ number_format($val, 4) }}</flux:table.cell>
+                                    @endforeach
+                                    <flux:table.cell class="font-bold">{{ number_format($result['qi_scores'][$i], 4) }}</flux:table.cell>
+                                </flux:table.row>
+                            @endforeach
+                        </flux:table.rows>
+                    </flux:table>
+                </div>
+            </div>
+        </div>
+
+        <flux:separator/>
+
         {{-- Tabel Ranking --}}
         <div class="flex flex-col gap-3">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
