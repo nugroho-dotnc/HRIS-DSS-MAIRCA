@@ -48,7 +48,7 @@ use Illuminate\Support\Facades\Route;
 
 // Authentication
 Route::prefix('auth')->group(function () {
-    Route::post('/login', [AuthController::class, 'login'])->name('api.auth.login');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login')->name('api.auth.login');
     Route::post('/register', [AuthController::class, 'registerCandidate'])->name('api.auth.register');
 });
 
