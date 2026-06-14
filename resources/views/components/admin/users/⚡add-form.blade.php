@@ -26,13 +26,18 @@ new class extends Component {
         $rules = [
             'user_name' => 'required | max:255',
             'user_email' => 'required | email | max:255 | unique:users,email',
-            'user_password' => 'required | min:8',
+            'user_password' => ['required', \Illuminate\Validation\Rules\Password::defaults()],
             'confirm_password' => 'required | same:user_password',
             'user_role' => 'required',
             'is_active' => 'required',
         ];
 
-        $this->validate($rules);
+        $messages = [
+            'user_password' => 'The user password field must contain at least one number and one symbol'
+        ];
+
+
+        $this->validate($rules, $messages);
 
         $data = [
             'name' => $this->user_name,

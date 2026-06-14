@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
-         if (app()->isProduction()) {
+        if (app()->isProduction()) {
             URL::forceScheme('https');
         }
 
@@ -42,14 +42,10 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
-                ->mixedCase()
-                ->letters()
+        Password::defaults(
+            fn(): Password => Password::min(6)
                 ->numbers()
                 ->symbols()
-                ->uncompromised()
-            : null,
         );
     }
 }

@@ -42,11 +42,15 @@ new class extends Component {
         ];
 
         if(!empty($this->user_password)){
-            $rules["user_password"] = "min:8";
+            $rules["user_password"] = [\Illuminate\Validation\Rules\Password::defaults()];;
             $rules["confirm_password"] = "required | same:user_password";
         }
 
-        $this->validate($rules);
+        $messages = [
+            'user_password' => 'The user password field must contain at least one number and one symbol'
+        ];
+
+        $this->validate($rules, $messages);
 
         $user = User::findOrFail($this->id);
 

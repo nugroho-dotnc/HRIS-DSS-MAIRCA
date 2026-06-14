@@ -72,7 +72,7 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Data tidak ditemukan.',
-                'data'    => [],
+                'data' => [],
             ]);
         }
 
@@ -125,9 +125,11 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
+            'password' => ['required', 'string', \Illuminate\Validation\Rules\Password::defaults()],
             'role' => ['required', Rule::in(['hr', 'supervisor', 'employee'])],
             'status' => ['sometimes', Rule::in(['active', 'inactive'])],
+        ], [
+            'password' => 'The user password field must contain at least one number and one symbol',
         ]);
 
         $user = User::create([
@@ -227,7 +229,9 @@ class UserController extends Controller
         $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => ['sometimes', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'password' => 'sometimes|string|min:8',
+            'password' => ['sometimes', 'string', \Illuminate\Validation\Rules\Password::defaults()],
+        ], [
+            'password' => 'The user password field must contain at least one number and one symbol',
         ]);
 
         if ($request->has('name'))
